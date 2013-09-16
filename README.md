@@ -1,2 +1,1 @@
-App_Academy_Exercises
-=====================
+This repository is for daily exercises completed during App Academy.
