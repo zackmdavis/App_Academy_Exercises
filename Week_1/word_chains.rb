@@ -17,61 +17,44 @@ class WordChains
     DICTIONARY.select { |other_word| other_word.adjacent?(word) }
   end
 
-  def find_chain(start_word, target_word)
-    @new_words = []
-    @visited_words = { start_word => nil }
-    current_words = [start_word]
-
-    until current_words.empty?
-      current_words.each do |current_word|
-
-        new_visited_words = {}
-        adjacent_words = adjacent_words(current_word)
-        adjacent_words.select! { |adjacent_word| !@visited_words.keys.include?(adjacent_word)}
-        @new_words += adjacent_words
-        break if @new_words.include?(target_word)
-        @new_words.each { |new_word| new_visited_words[new_word] = current_word }
-        @visited_words.merge!(new_visited_words)
+  def find_chain(start, target)
+    found = false
+    scanned = []
+    to_scan = []
+    to_scan.push({start => nil})
+    while !to_scan.empty? and !found do
+      scanning = to_scan.shift
+      if scanning.keys[0] == target
+        found = true
+        scanned.push(scanning)
+      else
+        adjacent_words(scanning.keys[0]).each do |adj_word|
+           if !scanned.include?(adj_word) and !to_scan.include?(adj_word)
+             to_scan.push({adj_word => scanning.keys[0]})
+           end
+        end
+        scanned.push(scanning)
       end
-      current_words = @new_words
-      @new_words = []
-      p current_words
     end
-    @visited_words
-  end
+    found ? construct_path(target, scanned) : nil
+  end 
 
-  def build_chain(visited_words, target)
+  private
+
+  def construct_path(target, scanned)
     chain = [target]
-    parent = visited_words[target]
+    backlink = scanned.find{|h| h.keys[0] == target}
+    parent = backlink[target]
     until parent.nil?
-      chain << parent
-      parent = visited_words[parent]
+      chain.push(parent)
+      backlink = scanned.find{|h| h.keys[0] == parent}
+      parent = backlink[parent]
     end
     chain.reverse
   end
 
-  # def find_chain2(start, target)
-  #   words = {start => nil}
-  #   until words.include?(target) do
-  #     more_words = words.map{|k,_| {k => adjacent_words(k)} }
-  #     more_words.each do |parent, adj|
-  #       unless adj.nil?
-  #         adj.each do |new_word|
-  #           words.merge({new_word => parent}) unless words.include?(new_word)
-  #         end
-  #       end
-  #     end
-  #   end
-  #   words
-  # end
-
 end
 
 wc = WordChains.new
-visited = wc.find_chain("bunt", "mint")
-chain = wc.build_chain(visited, "mint")
-p chain
-#p visited
-# my_words = wc.find_chain2("duck", "dust")
-# p my_words
-# p my_words.select{|k, _| k == "mist"}
+path = wc.find_chain("bunt", "mint")
+p path
