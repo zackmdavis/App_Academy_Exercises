@@ -53,24 +53,78 @@ class Game
 
 end
 
+# monkeypatch Array to give us deep duplication
+class Array
+  def deep_dup
+    arr = []
+    self.each do |el|
+      if el.is_a?(Array)
+        arr << el.deep_dup
+      else
+        arr << el
+      end
+    end
+    arr
+  end
+end
+
+
+class BoardNode
+  attr_accessor :parent, :children, :mark, :turn
+
+  def initialize(board, turn)
+    @value = board
+    @parent = nil
+    @children = []
+    @turn = turn
+  end
+
+  def possible_boards(mark)
+    @value.possible_boards(mark)
+  end
+
+  # def is_nonlosing_node?(node, turn)
+  #   if turn == 0
+  #     loss_symbol = :p2win
+  #   elsif turn == 1
+  #     loss_symbol = :p1win
+  #   end
+  #   self.children.each do |child|
+  #     if child.children.all? { |grandchild| grandchild.value.eval_board != loss_symbol }
+  #   end
+  # end
+
+  # def is_winning_node?(turn)
+  #   if turn == 0
+  #     win_symbol = :p1win
+  #   elsif turn == 1
+  #     win_symbol = :p2win
+  #   end
+  #   if self.value.eval_board == win_symbol
+  #     return true
+  #   end
+  #   winning? = self.children.all? do |child|
+  #     child.children.any? { |grandchild| grandchild.is_winning_node?(turn) }
+  #   end
+  #   winning?
+  # end
+  #
+  # def is_losing_node?(turn)
+  #   self.is_winning_node?((turn+1)%2)
+  # end
+
+end
+
+
 class Board
   attr_accessor :data
 
-  def initialize
-    @data = (1..3).map{|_| (1..3).map{|_| '_'}}
+  def initialize(data = (1..3).map{|_| (1..3).map{|_| '_'}})
+    @data = data
   end
 
   def mark(move, mark)
     @data[move[0]][move[1]] = mark
-  end
-
-  def counterfactual_mark(move, mark)
-    what_if = Board.new
-    temp = []
-    @data.each { |row| temp << row.dup}
-    what_if.data = temp
-    what_if.mark(move,mark)
-    what_if
   end
 
   def show
@@ -92,6 +146,20 @@ class Board
 
   def legal_move?(move)
     @data[move[0]][move[1]] == '_'
+  end
+
+  def legal_moves
+    all_moves = [[0,0], [0,1], [0,2], [1,0], [1,1], [1,2], [2,0], [2,1], [2,2]]
+    all_moves.select{|move| @data[move[0]][move[1]] == '_'}
+  end
+
+  def possible_boards(mark)
+    possible_moves = self.legal_moves
+    possible_boards = (0...possible_moves.length).map{|i| Board.new(@data.deep_dup)}
+    possible_boards.each_with_index do |poss_board, i|
+      poss_board.mark(possible_moves[i], mark)
+    end
+    possible_boards
   end
 
   def lines
@@ -140,31 +208,52 @@ end
 
 class ComputerPlayer
 
+  attr_accessor :root
 
   def initialize(mark)
     @mark = mark
-    @victory_conditions = {'X' => :p1win, 'O' => :p2win}
+  end
+
+  def build_game_tree(board, turn)
+    turn_to_mark = {0 => 'X', 1 => 'O'}
+    @root = BoardNode.new(board, turn)
+    to_evaluate = []
+    to_evaluate.push(@root)
+    counter = 0
+    until to_evaluate.empty?
+      counter += 1
+      p counter
+      evaluating = to_evaluate.shift
+      children = evaluating.possible_boards(turn_to_mark[(evaluating.turn+1) % 2])
+      children.map!{|child| BoardNode.new(child, (evaluating.turn+1) % 2)}
+      evaluating.children = children
+      evaluating.children.each do |child|
+          to_evaluate.push(child)
+      end
+    end
   end
 
   def take_move(board)
-    @victory_conditions[@mark]
-    legal_moves = []
-    (0..2).each do |row|
-      (0..2).each do |col|
-        if board.legal_move?([row,col])
-          legal_moves << [row, col]
-          what_if = board.counterfactual_mark([row, col], @mark)
-          if what_if.eval_board == @victory_conditions[@mark]
-            return [row, col]
-          end
-        end
-      end
+    if root.nil?
+      build_game_tree(board, 1)
     end
-    legal_moves.sample
+
+
   end
+
+
 end
 
-if __FILE__ == $PROGRAM_NAME
-  our_game = Game.new(1)
-  our_game.play
-end
+# if __FILE__ == $PROGRAM_NAME
+#   our_game = Game.new(1)
+#   our_game.play
+# end
+
+# test_ai = ComputerPlayer.new('O')
+# test_board1 = Board.new([['_','X','X'],['X','O','_'],['O','X','O']])
+# test_ai.build_game_tree(test_board1, 1)
+# p test_ai.def root
+
+test_ai = ComputerPlayer.new('O')
+test_board = Board.new([['_','_','_'],['_','X','_'],['O','_','_']])
+test_ai.build_game_tree(test_board, 0)
