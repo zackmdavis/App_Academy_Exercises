@@ -1,204 +1,195 @@
-require 'ruby-debug'
+# A classic game of tic-tac-toe.
+class TicTacToeGame
 
-class Game
+  def initialize
+    setup
+    play
+  end
 
-  def initialize(human_players = 1)
-    # Make board of underscores
-    @board = Board.new
-    @players = []
+  @@turn_to_mark = { 0 => 'X', 1 => 'O' }
+  # This hash maps a turn index to the corresponding player's mark.
+  def self.turn_to_mark
+    @@turn_to_mark
+  end
+
+  # Sets up the game.
+  def setup
+    @board = TicTacToeBoard.new
     @game_over = false
-    @turn = 0
-    @marks = { 0 => 'X', 1 => 'O' }
 
-    if human_players == 0
-      @players << ComputerPlayer.new('X')
-      @players << ComputerPlayer.new('O')
-    elsif human_players == 1
-      @players << HumanPlayer.new
-      @players << ComputerPlayer.new('O')
-    else
-      @players << HumanPlayer.new
-      @players << HumanPlayer.new
+    # player objects are stored in the two-element array @players
+    @players = []
+    # @turn indicates whose turn it is and indexes into @players
+    @turn = 0
+
+    human_players = nil
+    until human_players
+      puts "How many human players?"
+      human_players = gets.chomp
+      if human_players == "0"
+        @players << ComputerTicTacToePlayer.new('X')
+        @players << ComputerTicTacToePlayer.new('O')
+      elsif human_players == "1"
+        @players << HumanTicTacToePlayer.new('X')
+        @players << ComputerTicTacToePlayer.new('O')
+      elsif human_players == "2"
+        @players << HumanTicTacToePlayer.new
+        @players << HumanTicTacToePlayer.new
+      else
+        print "I'm sorry, I didn't understand that. Please enter '0', '1', or '2'."
+        human_players = nil
+      end
     end
   end
 
+  # Play!
   def play
-    messages = { :p1win => "Player 1 wins!", :p2win => "Player 2 wins!", :tie => "Draw!"}
 
     until @game_over
+      # display the board
       @board.show
-      # take move
-      move = @players[@turn].take_move(@board)
-      #p "Second one --  #{move}"
 
+      # take a move
+      move = @players[@turn].take_move(@board)
       until @board.legal_move?(move)
         puts "That move is not legal; try again!"
         move = @players[@turn].take_move(@board)
       end
 
-      @board.mark(move, @marks[@turn])
+      # mark the board
+      @board.mark(move, @@turn_to_mark[@turn])
 
-      # evaluate board
-      endings = [:p1win, :p2win, :tie]
-      if endings.include? @board.eval_board
-        puts messages[@board.eval_board]
+      # evaluate the board, declare outcome as appopriate
+      result = @board.evaluate
+      if result
         @game_over = true
-        @board.show
+        if result == 0 # first player win
+          puts "Player 1 ('X') wins!"
+          puts "Player 2 ('O') has been utterly defeated."
+          return 0
+        elsif result == 1 # second player win
+          puts "Player 2 ('O') wins!"
+          puts "Player 1 ('X') has been utterly defeated."
+          return 1
+        elsif result == 2 # tie
+          puts "The game was a tie, a 'cat's game.'"
+          return 2
+        end
       end
 
-      # now it's the other player's turn
+      # Now it's the other player's turn---
       @turn = (@turn + 1) % 2
     end
   end
 
 end
 
-# monkeypatch Array to give us deep duplication
-class Array
-  def deep_dup
-    arr = []
-    self.each do |el|
-      if el.is_a?(Array)
-        arr << el.deep_dup
-      else
-        arr << el
-      end
-    end
-    arr
-  end
-end
+# The tic-tac-toe arena.
+class TicTacToeBoard
+  attr_accessor :state
 
-
-class BoardNode
-  attr_accessor :parent, :children, :mark, :turn
-
-  def initialize(board, turn)
-    @value = board
-    @parent = nil
-    @children = []
-    @turn = turn
+  # Creates the board (empty by default).
+  def initialize(state = (1..3).map{ |_| (1..3).map{|_| '_'} })
+    @state = state
   end
 
-  def possible_boards(mark)
-    @value.possible_boards(mark)
+  # Returns the mark at indices i, j.
+  def at(i, j)
+    @state[i][j]
   end
 
-  # def is_nonlosing_node?(node, turn)
-  #   if turn == 0
-  #     loss_symbol = :p2win
-  #   elsif turn == 1
-  #     loss_symbol = :p1win
-  #   end
-  #   self.children.each do |child|
-  #     if child.children.all? { |grandchild| grandchild.value.eval_board != loss_symbol }
-  #   end
-  # end
-
-  # def is_winning_node?(turn)
-  #   if turn == 0
-  #     win_symbol = :p1win
-  #   elsif turn == 1
-  #     win_symbol = :p2win
-  #   end
-  #   if self.value.eval_board == win_symbol
-  #     return true
-  #   end
-  #   winning? = self.children.all? do |child|
-  #     child.children.any? { |grandchild| grandchild.is_winning_node?(turn) }
-  #   end
-  #   winning?
-  # end
-  #
-  # def is_losing_node?(turn)
-  #   self.is_winning_node?((turn+1)%2)
-  # end
-
-end
-
-
-class Board
-  attr_accessor :data
-
-  def initialize(data = (1..3).map{|_| (1..3).map{|_| '_'}})
-    @data = data
-  end
-
+  # Marks the board: +move+ is a two-element array, +mark+ is the
+  # player's mark
   def mark(move, mark)
-    @data[move[0]][move[1]] = mark
+    @state[move[0]][move[1]] = mark
   end
 
+  # Displays the board.
   def show
-    @data.each do |row|
+    puts
+    @state.each do |row|
       row.each do |mark|
         print mark, ' '
       end
       print "\n"
     end
+    puts
   end
 
-  def self.eval_line(line)
-    if line.join == 'XXX'
-      return :p1win
-    elsif line.join == 'OOO'
-      return :p2win
-    end
+  # Overrides +#clone+ to give deep duplication. 
+  def clone
+    orginal_state = self.state
+    copied_state = (0..2).map{ |row| original_state[row].dup }
+    TicTacToeBoard.new(copied_state)
   end
 
+  # Return true if the supplied move is legal.
   def legal_move?(move)
-    @data[move[0]][move[1]] == '_'
+    at(move[0], move[1]) == '_'
   end
 
+  # Returns an array of all legal moves.
   def legal_moves
-    all_moves = [[0,0], [0,1], [0,2], [1,0], [1,1], [1,2], [2,0], [2,1], [2,2]]
-    all_moves.select{|move| @data[move[0]][move[1]] == '_'}
+    all_moves = [[0,0], [0,1], [0,2], [1,0], [1,1], [1,2], [2,0],
+                 [2,1], [2,2]]
+    all_moves.select{|move| at(move[0], move[1]) == '_'}
   end
 
-  def possible_boards(mark)
-    possible_moves = self.legal_moves
-    possible_boards = (0...possible_moves.length).map{|i| Board.new(@data.deep_dup)}
-    possible_boards.each_with_index do |poss_board, i|
-      poss_board.mark(possible_moves[i], mark)
+  # Returns an array of possible next boards given mark of player to
+  # move next.
+  def possible_next_boards(mark)
+    possible_moves = legal_moves
+    possible_boards = possible_moves.map do |possible_move|
+      self.clone.mark(possible_move, mark)
     end
     possible_boards
   end
 
+  # Returns 0, 1, 2, or false for first player win, second player win,
+  # tie, and game-not-over-yet, respectively.
+  def evaluate
+    line_results = lines.map{ |l| TicTacToeBoard.evaluate_line(l) }
+    if line_results.any? # win
+      return line_results.select{ |result| result }[0]
+    elsif legal_moves.empty? # tie
+      return 2 
+    else # keep playing
+      return false
+    end
+  end
+
+  private
+
+  # Returns 0 (respectively 1) if the supplied array of marks
+  # indicates a win for the first (respectively second) player.
+  def self.evaluate_line(line)
+    if line.join == 'XXX'
+      return 0
+    elsif line.join == 'OOO'
+      return 1
+    else
+      return false
+    end
+  end
+
+  # Returns array of marks for all rows, diagonals, and columns.
   def lines
     [].tap do |all_lines|
-      (0..2).each do |i| # check rows
-        all_lines << @data[i]
+      (0..2).each do |row| # check rows
+        all_lines << (0..2).map{ |col| at(row, col) }
       end
-      (0..2).each do |i| # check columns
-        all_lines << @data.map{|row| row[i]}
+      (0..2).each do |col| # check columns
+        all_lines << (0..2).map{ |row| at(row, col) }
       end
       # check diagonals
-      all_lines << [@data[0][0], @data[1][1], @data[2][2]]
-      all_lines << [@data[0][2], @data[1][1], @data[2][0]]
+      all_lines << (0..2).map{ |i| at(i, i) }
+      all_lines << (0..2).map{ |i| at(i, 2-i) }
     end
   end
 
-  def eval_board
-    line_results = lines.map{|l| Board.eval_line(l) }
-    # any wins?
-    line_results.each do |result|
-      if (result == :p1win) || (result == :p2win)
-        return result
-      end
-    end
-
-    # draw?
-    unless @data.flatten.include? '_'
-      return :tie
-    else
-      return :keep_playing
-    end
-  end
-
-  def at(i, j)
-    @data[i][j]
-  end
 end
 
-class HumanPlayer
+class HumanTicTacToePlayer
   def take_move(board)
     puts "Human player, enter your move in the form 'row,column' (zero-based indexing)"
     input = gets.chomp
@@ -206,54 +197,34 @@ class HumanPlayer
   end
 end
 
-class ComputerPlayer
+class GametreeNode
+  attr_accessor :parent, :children, :state, :value, :maximizing
 
-  attr_accessor :root
+  def initialize(state)
+    @state = board
+    @parent = nil
+    @children = []
+    @turn = turn
+  end
+
+  def possible_boards(mark)
+    @state.possible_next_boards(mark)
+  end
+
+end
+
+class ComputerTicTacToePlayer
 
   def initialize(mark)
     @mark = mark
   end
 
-  def build_game_tree(board, turn)
-    turn_to_mark = {0 => 'X', 1 => 'O'}
-    @root = BoardNode.new(board, turn)
-    to_evaluate = []
-    to_evaluate.push(@root)
-    counter = 0
-    until to_evaluate.empty?
-      counter += 1
-      p counter
-      evaluating = to_evaluate.shift
-      children = evaluating.possible_boards(turn_to_mark[(evaluating.turn+1) % 2])
-      children.map!{|child| BoardNode.new(child, (evaluating.turn+1) % 2)}
-      evaluating.children = children
-      evaluating.children.each do |child|
-          to_evaluate.push(child)
-      end
-    end
-  end
-
   def take_move(board)
-    if root.nil?
-      build_game_tree(board, 1)
-    end
-
-
+    # TODO
   end
-
 
 end
 
-# if __FILE__ == $PROGRAM_NAME
-#   our_game = Game.new(1)
-#   our_game.play
-# end
-
-# test_ai = ComputerPlayer.new('O')
-# test_board1 = Board.new([['_','X','X'],['X','O','_'],['O','X','O']])
-# test_ai.build_game_tree(test_board1, 1)
-# p test_ai.def root
-
-test_ai = ComputerPlayer.new('O')
-test_board = Board.new([['_','_','_'],['_','X','_'],['O','_','_']])
-test_ai.build_game_tree(test_board, 0)
+if __FILE__ == $PROGRAM_NAME
+  TicTacToeGame.new
+end
