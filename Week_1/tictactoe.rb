@@ -6,10 +6,16 @@ class TicTacToeGame
     play
   end
 
-  @@turn_to_mark = { 0 => 'X', 1 => 'O' }
   # This hash maps a turn index to the corresponding player's mark.
+  @@turn_to_mark = { 0 => 'X', 1 => 'O' }
   def self.turn_to_mark
     @@turn_to_mark
+  end
+
+  # This hash maps a player's mark to the corresponding turn index.  
+  @@mark_to_turn = { 'X' => 0, 'O' => 1 }
+  def self.mark_to_turn
+    @@mark_to_turn
   end
 
   # Sets up the game.
@@ -33,10 +39,10 @@ class TicTacToeGame
         @players << HumanTicTacToePlayer.new('X')
         @players << ComputerTicTacToePlayer.new('O')
       elsif human_players == "2"
-        @players << HumanTicTacToePlayer.new
-        @players << HumanTicTacToePlayer.new
+        @players << HumanTicTacToePlayer.new('X')
+        @players << HumanTicTacToePlayer.new('O')
       else
-        print "I'm sorry, I didn't understand that. Please enter '0', '1', or '2'."
+        print "I'm sorry, I didn't understand that. Please enter '0', '1', or '2'. "
         human_players = nil
       end
     end
@@ -57,7 +63,7 @@ class TicTacToeGame
       end
 
       # mark the board
-      @board.mark(move, @@turn_to_mark[@turn])
+      @board.mark(move, TicTacToeGame.turn_to_mark[@turn])
 
       # evaluate the board, declare outcome as appopriate
       result = @board.evaluate
@@ -86,6 +92,7 @@ end
 
 # The tic-tac-toe arena.
 class TicTacToeBoard
+
   attr_accessor :state
 
   # Creates the board (empty by default).
@@ -118,7 +125,7 @@ class TicTacToeBoard
 
   # Overrides +#clone+ to give deep duplication. 
   def clone
-    orginal_state = self.state
+    original_state = @state
     copied_state = (0..2).map{ |row| original_state[row].dup }
     TicTacToeBoard.new(copied_state)
   end
@@ -158,6 +165,18 @@ class TicTacToeBoard
     end
   end
 
+  # Returns a move location at which supplied +current+ and +target+
+  # boards are different.
+  def self.move_to_achieve_state(current, target)
+    (0..2).each do |row|
+      (0..2).each do |col|
+        if current.at(row, col) != target.at(row_col)
+          return [row, col]
+        end
+      end
+    end
+  end
+
   private
 
   # Returns 0 (respectively 1) if the supplied array of marks
@@ -189,38 +208,110 @@ class TicTacToeBoard
 
 end
 
+# This class represents a human player.
 class HumanTicTacToePlayer
-  def take_move(board)
-    puts "Human player, enter your move in the form 'row,column' (zero-based indexing)"
-    input = gets.chomp
-    input.split(',').map(&:to_i)
-  end
-end
 
-class GametreeNode
-  attr_accessor :parent, :children, :state, :value, :maximizing
-
-  def initialize(state)
-    @state = board
-    @parent = nil
-    @children = []
-    @turn = turn
-  end
-
-  def possible_boards(mark)
-    @state.possible_next_boards(mark)
-  end
-
-end
-
-class ComputerTicTacToePlayer
+  attr_accessor :mark
 
   def initialize(mark)
     @mark = mark
   end
 
+  # Records the human's move.
   def take_move(board)
-    # TODO
+    puts "Human player, enter your move like 'row, column'"
+    input = gets.chomp
+    input.split(',').select{ |chr| chr != ' '}.map(&:to_i)
+  end
+
+end
+
+# This class represents a node in a game tree for use by AI players.
+class GametreeNode
+
+  attr_accessor :value, :parent, :children
+  attr_reader   :state, :turn
+
+  def initialize(state, turn, value = nil, parent = nil, children = nil)
+    @state = state
+    @turn = turn
+    @value = value
+    @parent = parent
+    @children = children
+  end
+
+  # Minimax search down from this node.
+  def negamax_search
+    evaluation = @state.evaluate 
+    if evaluation == 0 # first player win
+      @value = 1
+    elsif evaluation == 1 # second player win
+      @value = -1
+    elsif evaluation == 2 # tie
+      @value = 0
+    else
+      child_states = @state.possible_next_boards(
+           TicTacToeGame.turn_to_mark[turn])
+      @children = child_states.map do |state|
+        GametreeNode.new(state, (turn + 1) % 2)
+      end
+      @children.each{ |child| child.parent = self }
+      @children.each{ |child| child.negamax_search }
+      if turn == 0 # first player maximizing
+        @value = @children.map{ |child| child.value }.max
+      elsif turn == 1 # second player minimizing
+        @value = @children.map{ |child| child.value }.min
+      end
+    end
+    return @value
+  end
+
+end
+
+# Currently under development!
+class ComputerTicTacToePlayer
+
+  attr_accessor :gametree_root
+
+  def initialize(mark)
+    @mark = mark
+    @gametree_root = nil
+  end
+
+  # Build or reroot the game tree as necessary.
+  def gametree_surgery(board)
+    if @gametree_root.nil?
+      @gametree_root = GametreeNode.new(board, TicTacToeGame.mark_to_turn[@mark])
+    else
+      @gametree_root = @gametree_root.children.find do |child|
+        child.state == board
+      end
+    end
+  end
+
+  # Record the AI's move.
+  def take_move(board)
+    # For the first move, pick randomly (because searching the entire
+    # game tree is expensive).
+    if board.legal_moves.length > 7
+      return board.legal_moves.sample
+    else
+      gametree_surgery(board)
+      if gametree_root.children.nil?
+        gametree_root.negamax_search
+      end
+      if @turn == 0 # first player maximizing
+        new_board_node = gametree_root.children.max do |child1, child2|
+          child1.value <=> child2.value
+        end
+      elsif @turn == 1 # second player minimizing
+        new_board_node = gametree_root.children.min do |child1, child2|
+          child1.value <=> child2.value
+        end
+      end
+      @gametree_root = new_board_node
+      return TicTacToeBoard.move_to_achieve_state(new_board_node.state)
+    end
   end
 
 end
