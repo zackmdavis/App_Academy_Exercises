@@ -1,14 +1,16 @@
 require 'ostruct'
 
 class Minesweeper
-
+  GAME_ROWS = 25
+  GAME_COLS = 18
+  MINES = 10
   def initialize
     setup
     play
   end
 
   def setup
-    @board = MineBoard.new(9, 9, 10)
+    @board = MineBoard.new(GAME_ROWS, GAME_COLS, MINES)
   end
 
   def get_move
@@ -88,8 +90,29 @@ class MineBoard
     end
   end
 
+  def col_indices
+    top = "  "
+    bottom = "    "
+    @width.times do |col_index|
+      if(col_index < 10)
+        top << "  "
+        bottom << "#{col_index} "
+      else
+        top << "#{col_index/10} "
+        bottom << "#{col_index %10} "
+      end
+    end
+    "#{top}\n#{bottom}"
+  end
+
   def show
-    @minefield.each do |row|
+    print "  "
+
+    puts col_indices
+    @minefield.each_with_index do |row, row_index|
+      index_string = row_index.to_s
+      spacer = index_string.length == 1? "  " : " "
+      print spacer, row_index, " "
       row.each do |tile|
         if tile.flag?
           print "\u2691 " # flag icon
@@ -114,7 +137,7 @@ class MineBoard
   end
 
   def flag(coordinates)
-    @minefield[coordinates[0]][coordinates[1]].flag = true
+    @minefield[coordinates[0]][coordinates[1]].flag = !@minefield[coordinates[0]][coordinates[1]].flag
   end
 
   def find_tile(coordinates)
@@ -142,6 +165,7 @@ end
 class Tile
 
   attr_reader :location, :number
+  attr_writer :flag
 
   def initialize(coordinates, board)
     @location = coordinates
