@@ -9,11 +9,10 @@ class Minesweeper
 
   def setup
     @board = MineBoard.new(9, 9, 10)
-
   end
 
   def get_move
-    print "Please enter move ('f row,col' to flag, else 'row,col'): "
+    print "Please enter move ('f row,col' to flag; 'row,col' to explore): "
     move_string = gets.chomp
     move = OpenStruct.new
 
@@ -29,7 +28,7 @@ class Minesweeper
   end
 
   def play
-    until game_over? do
+    until game_over do
       @board.show
       move = get_move
       if move.flag
@@ -37,14 +36,21 @@ class Minesweeper
       else
         @board.explore(move.coordinates)
       end
+    end
+    @board.show
+  end
 
+  def game_over
+    if(@board.won?)
+      puts "good job"
+      true
+    elsif(@board.boom?)
+      puts "ouch"
+      true
+    else
+      false
     end
   end
-
-  def game_over?
-
-  end
-
 end
 
 class MineBoard
@@ -54,6 +60,7 @@ class MineBoard
     @width = width
     @mine_count = mine_count
     @minefield = []
+    @mines = []
     populate_minefield
   end
 
@@ -73,8 +80,10 @@ class MineBoard
         new_tile = Tile.new([row, col], self)
         if(mine_locations.include?([row, col]))
           new_tile.set_mine
+          @mines << new_tile
         end
         @minefield[row] << new_tile
+
       end
     end
   end
@@ -82,16 +91,18 @@ class MineBoard
   def show
     @minefield.each do |row|
       row.each do |tile|
-        if tile.flag
+        if tile.flag?
           print "\u2691 " # flag icon
-        elsif tile.explored
-          if tile.number != 0
+        elsif tile.explored?
+          if tile.boom?
+            print "\u2622 " # radioactivity symbol
+          elsif tile.number != 0
             print tile.number,  " "
-          else
+          elsif tile.number == 0
             print "  "
           end
         else
-          print "\u25A0 " # full block
+          print "\u25A0 " # filled-in square
         end
       end
       print "\n"
@@ -114,13 +125,23 @@ class MineBoard
     coordinates[0].between?(0, @height-1) and coordinates[1].between?(0, @width-1)
   end
 
+  def won?
+    mines_flagged = @mines.all?(&:flag?)
+    non_mines = @minefield.flatten.reject(&:mine?)
+    non_mines_explored = non_mines.all?(&:explored?)
+    mines_flagged && non_mines_explored
+  end
+
+  def boom?
+    @mines.any?(&:explored?)
+  end
+
 end
 
 
 class Tile
 
-  attr_reader :location, :mine, :explored, :number
-  attr_accessor :flag
+  attr_reader :location, :number
 
   def initialize(coordinates, board)
     @location = coordinates
@@ -153,7 +174,7 @@ class Tile
       neighbors = neighborhood
       @number = neighbors.select{|tile|tile.mine?}.count
       if @number.zero?
-        unexplored_neighbors = neighbors.reject{ |tile| tile.explored }
+        unexplored_neighbors = neighbors.reject{ |tile| tile.explored? }
         unexplored_neighbors.each(&:explore)
       end
 
@@ -171,6 +192,14 @@ class Tile
 
   def boom?
     @mine && @explored
+  end
+
+  def explored?
+    @explored
+  end
+
+  def flag?
+    @flag
   end
 
 
