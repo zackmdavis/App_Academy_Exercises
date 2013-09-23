@@ -70,7 +70,7 @@ class MineBoard
       @minefield << []
       (0...@width).each do |col|
         #put in mines
-        new_tile = Tile.new(row, col, self)
+        new_tile = Tile.new([row, col], self)
         if(mine_locations.include?([row, col]))
           new_tile.set_mine
         end
@@ -86,9 +86,9 @@ class MineBoard
           print "\u2691 " # flag icon
         elsif tile.explored
           if tile.number != 0
-            print tile.number
+            print tile.number,  " "
           else
-            print " "
+            print "  "
           end
         else
           print "\u25A0 " # full block
@@ -99,10 +99,19 @@ class MineBoard
   end
 
   def explore(coordinates)
+    @minefield[coordinates[0]][coordinates[1]].explore
   end
 
   def flag(coordinates)
     @minefield[coordinates[0]][coordinates[1]].flag = true
+  end
+
+  def find_tile(coordinates)
+    @minefield[coordinates[0]][coordinates[1]]
+  end
+
+  def in_bounds?(coordinates)
+    coordinates[0].between?(0, @height-1) and coordinates[1].between?(0, @width-1)
   end
 
 end
@@ -110,37 +119,46 @@ end
 
 class Tile
 
-  attr_reader :row, :col, :mine, :explored
+  attr_reader :location, :mine, :explored, :number
   attr_accessor :flag
 
-  def initialize(row, col, board)
-    @row = row
-    @col = col
+  def initialize(coordinates, board)
+    @location = coordinates
     @board = board
     @explored = false
     @flag = false
+    @number = nil
   end
 
   def neighborhood
     neighbors = []
-    (-1..1).each do |i|
-      (-1..1).each do |j|
-        unless i == 0 and j == 0
-          neighbors.push(board.at(i, j))
-        end
+    (-1..1).each do |row_offset|
+      (-1..1).each do |col_offset|
+        next if row_offset == 0 and col_offset == 0
+        neighbor_coordinates = [self.location[0]+row_offset, self.location[1]+col_offset]
+        next unless @board.in_bounds?(neighbor_coordinates)
+        neighbors.push(@board.find_tile(neighbor_coordinates))
       end
     end
     neighbors.compact
   end
 
-  def number
-    # actual logic goes here
-    return false
-  end
-
   def explore
-    ####....
+    #if mine, explode set to mine char, board knows game is over
+    #else find number
+    #call explore in BFS fashion on all unexplored neighbors
+    #if NO mines in neighbors, explore all neighbors
     @explored = true
+    unless boom?
+      neighbors = neighborhood
+      @number = neighbors.select{|tile|tile.mine?}.count
+      if @number.zero?
+        unexplored_neighbors = neighbors.reject{ |tile| tile.explored }
+        unexplored_neighbors.each(&:explore)
+      end
+
+    end
+
   end
 
   def set_mine
@@ -150,6 +168,11 @@ class Tile
   def mine?
     @mine
   end
+
+  def boom?
+    @mine && @explored
+  end
+
 
 end
 
