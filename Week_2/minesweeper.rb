@@ -10,10 +10,11 @@ class Minesweeper
   SAVE_FILE = 'saved_game.yaml'
 
   def initialize
-
     setup
     play
   end
+
+  private
 
   def setup
     @quit_requested = false
@@ -105,47 +106,7 @@ class MineBoard
     @width = width
     @mine_count = mine_count
     @minefield = []
-    @mines = []
     populate_minefield
-  end
-
-  def populate_minefield
-    mine_locations = []
-    until mine_locations.count == @mine_count do
-      candidate_location = [rand(0...@width), rand(0...@height)]
-      unless mine_locations.include?(candidate_location)
-        mine_locations.push(candidate_location)
-      end
-    end
-
-    (0...@height).each do |row|
-      @minefield << []
-      (0...@width).each do |col|
-        #put in mines
-        new_tile = Tile.new([row, col], self)
-        if(mine_locations.include?([row, col]))
-          new_tile.set_mine
-          @mines << new_tile
-        end
-        @minefield[row] << new_tile
-
-      end
-    end
-  end
-
-  def col_indices
-    top = "  "
-    bottom = "    "
-    @width.times do |col_index|
-      if(col_index < 10)
-        top << "  "
-        bottom << "#{col_index} "
-      else
-        top << "#{col_index/10} "
-        bottom << "#{col_index %10} "
-      end
-    end
-    "#{top}\n#{bottom}"
   end
 
   def show
@@ -192,16 +153,57 @@ class MineBoard
   end
 
   def won?
-    mines = @minefield.flatten.select{|tile|tile.mine?}
-    mines_flagged = @mines.all?(&:flag?)
+    mines = @minefield.flatten.select{ |tile| tile.mine? }
+    mines_flagged = mines.all?(&:flag?)
     non_mines = @minefield.flatten.reject(&:mine?)
     non_mines_explored = non_mines.all?(&:explored?)
     mines_flagged && non_mines_explored
   end
 
   def boom?
-    @mines.any?(&:explored?)
+    mines = @minefield.flatten.select{ |tile| tile.mine? }
+    mines.any?(&:explored?)
   end
+
+  private
+
+  def populate_minefield
+    mine_locations = []
+    until mine_locations.count == @mine_count do
+      candidate_location = [rand(0...@width), rand(0...@height)]
+      unless mine_locations.include?(candidate_location)
+        mine_locations.push(candidate_location)
+      end
+    end
+
+    (0...@height).each do |row|
+      @minefield << []
+      (0...@width).each do |col|
+        #put in mines
+        new_tile = Tile.new([row, col], self)
+        if(mine_locations.include?([row, col]))
+          new_tile.set_mine
+        end
+        @minefield[row] << new_tile
+      end
+    end
+  end
+
+  def col_indices
+    top = "  "
+    bottom = "    "
+    @width.times do |col_index|
+      if(col_index < 10)
+        top << "  "
+        bottom << "#{col_index} "
+      else
+        top << "#{col_index/10} "
+        bottom << "#{col_index %10} "
+      end
+    end
+    "#{top}\n#{bottom}"
+  end
+
 
 end
 
@@ -233,10 +235,6 @@ class Tile
   end
 
   def explore
-    #if mine, explode set to mine char, board knows game is over
-    #else find number
-    #call explore in BFS fashion on all unexplored neighbors
-    #if NO mines in neighbors, explore all neighbors
     @explored = true
     unless boom?
       neighbors = neighborhood
