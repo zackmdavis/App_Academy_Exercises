@@ -26,7 +26,7 @@ class Minesweeper
     puts "Welcome to Minesweeper"
     puts "Current settings: size: #{rows}, #{cols}, mines: #{mines}"
     puts "enter 'n' to start a new game, 's' to change size/mine settings, 'l' to load a saved game"
-    setup_input = gets.chomp
+    setup_input = get_char
 
     case setup_input
     when 'n'
@@ -42,6 +42,17 @@ class Minesweeper
     puts "(note: you can save your game with 's' or quit with 'q')"
   end
 
+  def get_char
+    # Thanks to http://stackoverflow.com/questions/8142901/ruby-stdin-getc-does-not-read-char-on-reception
+    begin
+      system("stty raw -echo")
+      str = STDIN.getc
+    ensure
+      system("stty -raw echo")
+    end
+    str.chr
+  end
+
   def get_settings
     puts "enter new settings like 'rows,columns,number_of_mines'"
     settings_input = gets.chomp
@@ -49,14 +60,15 @@ class Minesweeper
   end
 
   def get_move
-    print "Please enter move ('f row,col' to flag; 'row,col' to explore): "
-    move_string = gets.chomp
-    move = OpenStruct.new
+    print "Use i,j,k,l to steer the cursor. Space to explore. 'f' to flag."
+    command = get_char
 
-    case move_string[0]
+    move = OpenStruct.new
+    move.flag = false
+    case command
+    when ' '
     when 'f'
       move.flag = true
-      move_string = move_string[2..-1]
     when 's'
       File.open(SAVE_FILE, 'w').write(YAML::dump(@board))
       return nil
@@ -64,10 +76,11 @@ class Minesweeper
       @quit_requested = true
       return nil
     else
-      move.flag = false
+      @board.move_cursor(command)
+      return nil
     end
 
-    move.coordinates = move_string.split(',').map(&:to_i)
+    move.coordinates = @board.cursor_location
     move
   end
 
@@ -100,12 +113,14 @@ class Minesweeper
 end
 
 class MineBoard
+  attr_reader :cursor_location
 
   def initialize(height, width, mine_count)
     @height = height
     @width = width
     @mine_count = mine_count
     @minefield = []
+    @cursor_location = [0,0]
     populate_minefield
   end
 
@@ -118,7 +133,9 @@ class MineBoard
       spacer = index_string.length == 1? "  " : " "
       print spacer, row_index, " "
       row.each do |tile|
-        if tile.flag?
+        if tile.location == @cursor_location
+          print "\u2591 " # light shaded block
+        elsif tile.flag?
           print "\u2691 " # flag icon
         elsif tile.explored?
           if tile.boom?
@@ -133,6 +150,23 @@ class MineBoard
         end
       end
       print "\n"
+    end
+  end
+
+  def move_cursor(command_key)
+    new_location = @cursor_location.dup
+    case command_key
+    when 'i'
+      new_location[0] -= 1
+    when 'j'
+      new_location[1] -= 1
+    when 'k'
+      new_location[0] += 1
+    when 'l'
+      new_location[1] += 1
+    end
+    if self.in_bounds?(new_location)
+      @cursor_location = new_location
     end
   end
 
