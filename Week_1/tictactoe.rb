@@ -1,3 +1,5 @@
+require 'debugger'
+
 # A classic game of tic-tac-toe.
 class TicTacToeGame
 
@@ -12,7 +14,7 @@ class TicTacToeGame
     @@turn_to_mark
   end
 
-  # This hash maps a player's mark to the corresponding turn index.  
+  # This hash maps a player's mark to the corresponding turn index.
   @@mark_to_turn = { 'X' => 0, 'O' => 1 }
   def self.mark_to_turn
     @@mark_to_turn
@@ -33,14 +35,14 @@ class TicTacToeGame
       puts "How many human players?"
       human_players = gets.chomp
       if human_players == "0"
-        @players << ComputerTicTacToePlayer.new('X')
-        @players << ComputerTicTacToePlayer.new('O')
+        @players << ComputerTicTacToePlayer.new('X', 0)
+        @players << ComputerTicTacToePlayer.new('O', 1)
       elsif human_players == "1"
-        @players << HumanTicTacToePlayer.new('X')
-        @players << ComputerTicTacToePlayer.new('O')
+        @players << HumanTicTacToePlayer.new('X', 0)
+        @players << ComputerTicTacToePlayer.new('O', 1)
       elsif human_players == "2"
-        @players << HumanTicTacToePlayer.new('X')
-        @players << HumanTicTacToePlayer.new('O')
+        @players << HumanTicTacToePlayer.new('X', 0)
+        @players << HumanTicTacToePlayer.new('O', 1)
       else
         print "I'm sorry, I didn't understand that. Please enter '0', '1', or '2'. "
         human_players = nil
@@ -123,7 +125,7 @@ class TicTacToeBoard
     puts
   end
 
-  # Overrides +#clone+ to give deep duplication. 
+  # Overrides +#clone+ to give deep duplication.
   def clone
     original_state = @state
     copied_state = (0..2).map{ |row| original_state[row].dup }
@@ -147,7 +149,9 @@ class TicTacToeBoard
   def possible_next_boards(mark)
     possible_moves = legal_moves
     possible_boards = possible_moves.map do |possible_move|
-      self.clone.mark(possible_move, mark)
+      next_board = self.clone
+      next_board.mark(possible_move, mark)
+      next_board
     end
     possible_boards
   end
@@ -159,7 +163,7 @@ class TicTacToeBoard
     if line_results.any? # win
       return line_results.select{ |result| result }[0]
     elsif legal_moves.empty? # tie
-      return 2 
+      return 2
     else # keep playing
       return false
     end
@@ -170,7 +174,7 @@ class TicTacToeBoard
   def self.move_to_achieve_state(current, target)
     (0..2).each do |row|
       (0..2).each do |col|
-        if current.at(row, col) != target.at(row_col)
+        if current.at(row, col) != target.at(row, col)
           return [row, col]
         end
       end
@@ -213,7 +217,7 @@ class HumanTicTacToePlayer
 
   attr_accessor :mark
 
-  def initialize(mark)
+  def initialize(mark, turn)
     @mark = mark
   end
 
@@ -242,7 +246,7 @@ class GametreeNode
 
   # Minimax search down from this node.
   def negamax_search
-    evaluation = @state.evaluate 
+    evaluation = @state.evaluate
     if evaluation == 0 # first player win
       @value = 1
     elsif evaluation == 1 # second player win
@@ -250,8 +254,10 @@ class GametreeNode
     elsif evaluation == 2 # tie
       @value = 0
     else
+      #p @state
       child_states = @state.possible_next_boards(
            TicTacToeGame.turn_to_mark[turn])
+      #p child_states
       @children = child_states.map do |state|
         GametreeNode.new(state, (turn + 1) % 2)
       end
@@ -273,8 +279,9 @@ class ComputerTicTacToePlayer
 
   attr_accessor :gametree_root
 
-  def initialize(mark)
+  def initialize(mark, turn)
     @mark = mark
+    @turn = 1
     @gametree_root = nil
   end
 
@@ -283,8 +290,11 @@ class ComputerTicTacToePlayer
     if @gametree_root.nil?
       @gametree_root = GametreeNode.new(board, TicTacToeGame.mark_to_turn[@mark])
     else
-      @gametree_root = @gametree_root.children.find do |child|
-        child.state == board
+      @gametree_root.children.each do |child|
+        if child.state == board
+          @gametree_root = child
+          break
+        end
       end
     end
   end
@@ -293,6 +303,7 @@ class ComputerTicTacToePlayer
   def take_move(board)
     # For the first move, pick randomly (because searching the entire
     # game tree is expensive).
+    debugger
     if board.legal_moves.length > 7
       return board.legal_moves.sample
     else
@@ -310,7 +321,8 @@ class ComputerTicTacToePlayer
         end
       end
       @gametree_root = new_board_node
-      return TicTacToeBoard.move_to_achieve_state(new_board_node.state)
+      move = TicTacToeBoard.move_to_achieve_state(board, new_board_node.state)
+      move
     end
   end
 
