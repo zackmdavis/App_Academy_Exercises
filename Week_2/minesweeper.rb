@@ -1,16 +1,50 @@
 require 'ostruct'
+require 'yaml'
 
+# This class represents the Minesweeper game.
 class Minesweeper
-  GAME_ROWS = 25
-  GAME_COLS = 18
-  MINES = 10
+
+  DEFAULT_GAME_ROWS = 12
+  DEFAULT_GAME_COLS = 12
+  DEFAULT_MINES = 10
+  SAVE_FILE = 'saved_game.yaml'
+
   def initialize
+
     setup
     play
   end
 
   def setup
-    @board = MineBoard.new(GAME_ROWS, GAME_COLS, MINES)
+    @quit_requested = false
+
+    rows = DEFAULT_GAME_ROWS
+    cols = DEFAULT_GAME_COLS
+    mines = DEFAULT_MINES
+
+    puts "Welcome to Minesweeper"
+    puts "Current settings: size: #{rows}, #{cols}, mines: #{mines}"
+    puts "enter 'n' to start a new game, 's' to change size/mine settings, 'l' to load a saved game"
+    setup_input = gets.chomp
+
+    case setup_input
+    when 'n'
+      @board = MineBoard.new(rows, cols, mines)
+    when 's'
+      rows, cols, mines = get_settings
+      @board = MineBoard.new(rows, cols,mines)
+    when 'l'
+      @board = YAML::load(File.open(SAVE_FILE, 'r'))
+    else
+      setup
+    end
+    puts "(note: you can save your game with 's' or quit with 'q')"
+  end
+
+  def get_settings
+    puts "enter new settings like 'rows,columns,number_of_mines'"
+    settings_input = gets.chomp
+    settings_input.split(',').map(&:to_i)
   end
 
   def get_move
@@ -18,9 +52,16 @@ class Minesweeper
     move_string = gets.chomp
     move = OpenStruct.new
 
-    if move_string[0] == 'f'
+    case move_string[0]
+    when 'f'
       move.flag = true
       move_string = move_string[2..-1]
+    when 's'
+      File.open(SAVE_FILE, 'w').write(YAML::dump(@board))
+      return nil
+    when 'q'
+      @quit_requested = true
+      return nil
     else
       move.flag = false
     end
@@ -30,13 +71,15 @@ class Minesweeper
   end
 
   def play
-    until game_over do
+    until game_over || @quit_requested do
       @board.show
       move = get_move
-      if move.flag
-        @board.flag(move.coordinates)
-      else
-        @board.explore(move.coordinates)
+      if move
+        if move.flag
+          @board.flag(move.coordinates)
+        else
+          @board.explore(move.coordinates)
+        end
       end
     end
     @board.show
@@ -149,6 +192,7 @@ class MineBoard
   end
 
   def won?
+    mines = @minefield.flatten.select{|tile|tile.mine?}
     mines_flagged = @mines.all?(&:flag?)
     non_mines = @minefield.flatten.reject(&:mine?)
     non_mines_explored = non_mines.all?(&:explored?)
@@ -164,8 +208,8 @@ end
 
 class Tile
 
+  attr_accessor :flag
   attr_reader :location, :number
-  attr_writer :flag
 
   def initialize(coordinates, board)
     @location = coordinates
