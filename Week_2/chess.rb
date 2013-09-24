@@ -1,3 +1,5 @@
+require 'colorize'
+
 class Array
   def deep_dup
     self.each do |elem|
@@ -22,6 +24,28 @@ class ChessBoard
   def initialize(board = nil)
     if board.nil?
       board = Array.new(8){ Array.new(8) }
+      board[0][0] = Rook.new(self, [0,0], :black)
+      board[0][1] = Knight.new(self, [0,1], :black)
+      board[0][2] = Bishop.new(self, [0,2], :black)
+      board[0][3] = Queen.new(self, [0,3], :black)
+      board[0][4] = King.new(self, [0,4], :black)
+      board[0][5] = Bishop.new(self, [0,5], :black)
+      board[0][6] = Knight.new(self, [0,6], :black)
+      board[0][7] = Rook.new(self, [0,7], :black)
+      (0..7).each do |j|
+        board[1][j] = Pawn.new(self, [1, j], :black)
+      end
+      (0..7).each do |j|
+        board[6][j] = Pawn.new(self, [6, j], :white)
+      end
+      board[7][0] = Rook.new(self, [7,0], :white)
+      board[7][1] = Knight.new(self, [7,1], :white)
+      board[7][2] = Bishop.new(self, [7,2], :white)
+      board[7][3] = Queen.new(self, [7,3], :white)
+      board[7][4] = King.new(self, [7,4], :white)
+      board[7][5] = Bishop.new(self, [7,5], :white)
+      board[7][6] = Knight.new(self, [7,6], :white)
+      board[7][7] = Rook.new(self, [7,7], :white)
     end
     @board = board
   end
@@ -144,7 +168,7 @@ class Pawn < ChessPiece
     if color == :white
       @icon = "\u2659"
     elsif color == :black
-      @icon = "\u265F"
+      @icon = "\u265F".colorize(:red)
     end
   end
 end
@@ -157,7 +181,7 @@ class King < SteppingPiece
     if color == :white
       @icon = "\u2654"
     elsif color == :black
-      @icon = "\u265A"
+      @icon = "\u265A".colorize(:red)
     end
   end
 end
@@ -170,7 +194,7 @@ class Queen < SlidingPiece
     if color == :white
       @icon = "\u2655"
     elsif color == :black
-      @icon = "\u265B"
+      @icon = "\u265B".colorize(:red)
     end
   end
 end
@@ -183,7 +207,7 @@ class Rook < SlidingPiece
     if color == :white
       @icon = "\u2656"
     elsif color == :black
-      @icon = "\u265C"
+      @icon = "\u265C".colorize(:red)
     end
   end
 end
@@ -196,7 +220,7 @@ class Bishop < SlidingPiece
     if color == :white
       @icon = "\u2657"
     elsif color == :black
-      @icon = "\u265D"
+      @icon = "\u265D".colorize(:red)
     end
   end
 end
@@ -209,7 +233,7 @@ class Knight < SteppingPiece
     if color == :white
       @icon = "\u2658"
     elsif color == :black
-      @icon = "\u265E"
+      @icon = "\u265E".colorize(:red)
     end
   end
 end
