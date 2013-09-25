@@ -1,16 +1,17 @@
 require 'colorize'
+require 'debugger'
 
-class Array
-  def deep_dup
-    self.each do |elem|
-      if elem.is_a?(Array)
-        elem.deep_dup
-      elsif !elem.nil?
-        elem.dup
-      end
-    end
-  end
-end
+# class Array
+#   def deep_dup
+#     self.each do |elem|
+#       if elem.is_a?(Array)
+#         elem.deep_dup
+#       elsif !elem.nil?
+#         elem.dup
+#       end
+#     end
+#   end
+# end
 
 class ChessGame
 
@@ -102,7 +103,10 @@ class HumanPlayer
   end
 
   def select_move
-    return false unless get_command
+    unless get_command
+      @board.possible_moves = []
+      return false
+    end
     if @board.possible_moves.include?(@board.cursor_location)
       @board.make_move(@selected_piece, @board.cursor_location)
       @board.possible_moves = []
@@ -133,10 +137,13 @@ class ChessBoard
 
   attr_accessor :board, :cursor_location, :possible_moves
 
-  def initialize(board = nil)
-    if board.nil?
-      board = Array.new(8){ Array.new(8) }
+  def initialize(options = {})
+    defaults = { empty: false }
+    options = defaults.merge(options)
 
+    board = Array.new(8){ Array.new(8) }
+
+    unless options[:empty]
       place_major_pieces(board, :black)
       (0..7).each do |j|
         board[1][j] = Pawn.new(self, [1, j], :black)
@@ -181,7 +188,31 @@ class ChessBoard
   end
 
   def dup
-    ChessBoard.new(@board.deep_dup)
+    new_board = ChessBoard.new({ empty: true })
+
+    @board.each_with_index do |row, index|
+      new_row = []
+      row.each do |square|
+        unless square.nil?
+          new_row.push(square.class.new(new_board, [square.position[0], square.position[1]], square.color))
+        end
+      end
+      new_board.board[index] = new_row
+    end
+
+    new_board
+  end
+
+  def each_of_color(color, &prc)
+    @board.each do |row|
+      row.each do |square|
+        unless square.nil?
+          if square.color == color
+            prc.call(square)
+          end
+        end
+      end
+    end
   end
 
   def make_move(piece, position)
@@ -191,12 +222,30 @@ class ChessBoard
     self
   end
 
-  def in_check?(color)
-    false # placeholder
+  def ChessBoard.find_king(board, color)
+    board.each_of_color(color) do |piece|
+      if piece.is_a?(King)
+        return piece.position
+      end
+    end
+  end
+
+  def ChessBoard.in_check?(board, color)
+    attackers = (color == :white) ? :black : :white
+    king_position = ChessBoard.find_king(board, color)
+
+    board.each_of_color(attackers) do |attacking_piece|
+      attacking_piece.naive_moves.each do |move|
+        if move == king_position
+          return true
+        end
+      end
+    end
+    return false
   end
 
   def checkmated?(color)
-    false # placeholder
+    false
   end
 
   def ChessBoard.square_colored?(position)
@@ -208,6 +257,7 @@ class ChessBoard
   end
 
   def show
+    system("clear")
     print " a b c d e f g h\n"
     square_color = {true => :black, false => :red}
 
@@ -250,14 +300,23 @@ class ChessPiece
   end
 
   def reject_check_moves(moves)
-    moves.reject { |move| @board.dup.make_move(self, move).in_check?(@color) }
+    moves.reject do |move|
+      new_board = @board.dup
+      ChessBoard.in_check?(new_board.make_move(self.class.new(new_board, @position.dup, @color), move), @color)
+    end
+  end
+
+  def legal_moves
+    debugger
+    moves = naive_moves
+    reject_check_moves(moves)
   end
 
 end
 
 class SlidingPiece < ChessPiece
 
-  def legal_moves
+  def naive_moves
     moves = []
     directions.each do |direction|
       multiplier = 1
@@ -279,13 +338,13 @@ class SlidingPiece < ChessPiece
         multiplier += 1
       end
     end
-    reject_check_moves(moves)
+    moves
   end
 end
 
 class SteppingPiece < ChessPiece
 
-  def legal_moves
+  def naive_moves
     moves = []
     offsets.each do |offset|
       candidate_move = move_from_offset(offset)
@@ -297,7 +356,7 @@ class SteppingPiece < ChessPiece
         end
       end
     end
-    reject_check_moves(moves)
+    moves
   end
 
 end
@@ -314,7 +373,7 @@ class Pawn < ChessPiece
     end
   end
 
-  def legal_moves
+  def naive_moves
     moves = []
     if @board.at([@position[0]+@forward, @position[1]]).nil?
       moves.push([@position[0]+@forward, @position[1]])
@@ -325,7 +384,10 @@ class Pawn < ChessPiece
         moves.push([@position[0]+@forward, @position[1]+j])
       end
     end
-    moves = reject_check_moves(moves)
+    home_row = self.color == :white ? 6 : 1
+    if self.position[0] == home_row # can move two spaces on first move
+      moves.push([@position[0]+2*@forward, @position[1]])
+    end
     moves.select { |move| ChessBoard.in_bounds?(move) }
   end
 end
@@ -405,4 +467,4 @@ class Knight < SteppingPiece
   end
 end
 
-game = ChessGame.new
+ChessGame.new
