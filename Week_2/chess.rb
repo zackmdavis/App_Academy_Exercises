@@ -128,10 +128,19 @@ class HumanPlayer
       return false
     end
     if @board.possible_moves.include?(@board.cursor_location)
+
+      # special case: set en passant flag
+      if  @selected_piece.is_a?(Pawn) && (@board.cursor_location[0] - @selected_piece.position[0]).abs == 2
+        @selected_piece.en_passant_vulnerable = true
+      end
+
       @board.make_move(@selected_piece, @board.cursor_location)
+
+      # special case: pawn promotion
       if @selected_piece.is_a?(Pawn) && (@board.cursor_location[0] == 0 || @board.cursor_location[0] == 7)
         promote_pawn
       end
+
       @board.possible_moves = []
     else
       return select_move
@@ -266,6 +275,26 @@ class ChessBoard
       else
         make_move(@board[position[0]][0], [position[0], position[1]+1])
         @message = "Last move: O-O-O"
+      end
+    end
+
+    # special case for en passant capture
+    if piece.is_a?(Pawn)
+      [-1, 1].each do |j|
+        if position[1] == piece.position[1] + j
+          pawn = @board[piece.position[0]][piece.position[1]+j]
+          if !pawn.nil? and pawn.is_a?(Pawn) and pawn.en_passant_vulnerable
+            @board[piece.position[0]][piece.position[1]+j] = nil
+            @message = "Last move: #{piece.icon} x#{FILES[position[1]]}#{RANKS[position[0]]} e.p."
+          end
+        end
+      end
+    end
+
+    # deactivate any en passant flags
+    each_of_color(piece.color == :white ? :black : :white) do |piece|
+      if piece.is_a?(Pawn) and piece.en_passant_vulnerable
+        piece.en_passant_vulnerable = false
       end
     end
 
@@ -419,6 +448,9 @@ class SteppingPiece < ChessPiece
 end
 
 class Pawn < ChessPiece
+
+  attr_accessor :en_passant_vulnerable
+
   def initialize(board, position, color)
     super(board, position, color)
     if color == :white
@@ -428,6 +460,7 @@ class Pawn < ChessPiece
       @icon = "\u265F".colorize(:green)
       @forward = 1
     end
+    @en_passant_vulnerable = false
   end
 
   def naive_moves
@@ -441,9 +474,15 @@ class Pawn < ChessPiece
         moves.push([@position[0]+2*@forward, @position[1]])
       end
     end
+
     [-1, 1].each do |j|
       piece = @board.at([@position[0]+@forward, @position[1]+j])
       if !piece.nil? and piece.color != @color
+        moves.push([@position[0]+@forward, @position[1]+j])
+      end
+      # check if en passant capture is available
+      piece = @board.at([@position[0], @position[1]+j])
+      if !piece.nil? and piece.is_a?(Pawn) and piece.en_passant_vulnerable
         moves.push([@position[0]+@forward, @position[1]+j])
       end
     end
