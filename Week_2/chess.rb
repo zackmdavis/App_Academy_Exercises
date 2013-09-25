@@ -37,8 +37,8 @@ class ChessGame
     @board.cursor_location = [nil, nil]
     @board.show
 
-    message = ChessBoard.checkmated?(@board, :white) ? "Black wins!!" : "White wins!!"
-    puts message
+    victory_message = ChessBoard.checkmated?(@board, :white) ? "Black wins!!" : "White wins!!"
+    puts victory_message
   end
 
 end
@@ -129,7 +129,7 @@ class HumanPlayer
     end
     if @board.possible_moves.include?(@board.cursor_location)
       @board.make_move(@selected_piece, @board.cursor_location)
-      if @selected_piece.is_a?(Pawn) && @board.cursor_location[0] == 0 || @board.cursor_location[0] == 7
+      if @selected_piece.is_a?(Pawn) && (@board.cursor_location[0] == 0 || @board.cursor_location[0] == 7)
         promote_pawn
       end
       @board.possible_moves = []
@@ -156,7 +156,6 @@ class HumanPlayer
       select_piece
     end
   end
-
 end
 
 
@@ -186,7 +185,8 @@ class ChessBoard
     @board = board
     @cursor_location = [0,0]
     @possible_moves = []
-    @message = "Welcome to chess!\n 'IJKL' to move cursor\n'Z' to select a piece/move\n'X'to unselect"
+    @message = "Welcome to chess!\n'IJKL' to move cursor\n'Z' to select a piece/move" +
+      "\n'X' to unselect"
   end
 
   def place_major_pieces(board, color)
@@ -254,8 +254,21 @@ class ChessBoard
     else
       @message = "Last move: #{piece.icon} #{FILES[position[1]]}#{RANKS[position[0]]}"
     end
+    piece.moved = true
     @board[piece.position[0]][piece.position[1]] = nil
     @board[position[0]][position[1]] = piece
+
+    # special case for castling
+    if piece.is_a?(King) and ((position[1] - piece.position[1]).abs == 2)
+      if (position[1] - piece.position[1]) == 2
+        make_move(@board[position[0]][7], [position[0], position[1]-1])
+        @message = "Last move: O-O"
+      else
+        make_move(@board[position[0]][0], [position[0], position[1]+1])
+        @message = "Last move: O-O-O"
+      end
+    end
+
     piece.position = position
     self
   end
@@ -326,12 +339,13 @@ end
 
 class ChessPiece
 
-  attr_accessor :board, :position, :color, :icon
+  attr_accessor :board, :position, :color, :icon, :moved
 
   def initialize(board, position, color)
     @board = board
     @position = position
     @color = color
+    @moved = false
   end
 
   def move_from_offset(offset)
@@ -351,7 +365,6 @@ class ChessPiece
   end
 
   def legal_moves
-    #debugger
     moves = naive_moves
     reject_check_moves(moves)
   end
@@ -440,6 +453,9 @@ class Pawn < ChessPiece
 end
 
 class King < SteppingPiece
+
+  alias :super_legal_moves :legal_moves
+
   def offsets
     [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]]
   end
@@ -452,6 +468,43 @@ class King < SteppingPiece
       @icon = "\u265A".colorize(:green)
     end
   end
+
+  def can_castle?(direction)
+    rook_file = (direction == -1) ? 0 : 7
+    rook = @board.at([@position[0], rook_file])
+    unless rook.is_a?(Rook)
+      return false
+    end
+    if @moved or rook.moved
+      return false
+    end
+    between = (direction == -1) ? (rook_file+1...@position[1]).to_a : (@position[1]+1...rook_file)
+    between.each do |j|
+      unless @board.at([@position[0],j]).nil?
+        return false
+      end
+    end
+
+    moves = [[@position[0], @position[1]+(direction*2)], [@position[0], @position[1]+(direction)]]
+
+    unless moves == reject_check_moves(moves)
+      return false
+    end
+
+    true
+  end
+
+  def legal_moves
+    moves = super_legal_moves
+    if can_castle?(1)
+      moves << [@position[0], @position[1]+2]
+    end
+    if can_castle?(-1)
+      moves << [@position[0], @position[1]-2]
+    end
+    moves
+  end
+
 end
 
 class Queen < SlidingPiece
@@ -514,4 +567,10 @@ class Knight < SteppingPiece
   end
 end
 
-ChessGame.new
+
+#begin
+  ChessGame.new
+# rescue
+#   puts $!
+#   puts caller[0..100]
+# end
