@@ -25,8 +25,6 @@ class ChessGame
         break if playing.select_move
       end
 
-
-
       case white_playing
       when true
         playing = @player2
@@ -118,7 +116,10 @@ class HumanPlayer
     when "b"
       promotion = Bishop
     end
-    @board.board[@selected_piece.position[0]][@selected_piece.position[1]] = promotion.new(@board, @selected_piece.position, @selected_piece.color)
+    promoted = promotion.new(@board, @selected_piece.position, @selected_piece.color)
+    @board.board[@selected_piece.position[0]][@selected_piece.position[1]] = promoted
+    @board.message = "Last move: #{@selected_piece.icon} #{ChessBoard::FILES[@selected_piece.position[1]]}" +
+      "#{ChessBoard::RANKS[@selected_piece.position[0]]} = #{promoted.icon}"
   end
 
   def select_move
@@ -161,7 +162,10 @@ end
 
 class ChessBoard
 
-  attr_accessor :board, :cursor_location, :possible_moves
+  attr_accessor :board, :cursor_location, :possible_moves, :message
+
+  RANKS = ['8', '7', '6', '5', '4', '3', '2', '1']
+  FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
 
   def initialize(options = {})
     defaults = { empty: false }
@@ -182,6 +186,7 @@ class ChessBoard
     @board = board
     @cursor_location = [0,0]
     @possible_moves = []
+    @message = "Welcome to chess!\n 'IJKL' to move cursor\n'Z' to select a piece/move\n'X'to unselect"
   end
 
   def place_major_pieces(board, color)
@@ -244,6 +249,11 @@ class ChessBoard
   end
 
   def make_move(piece, position)
+    if @board[position[0]][position[1]]
+      @message = "Last move: #{piece.icon} x#{FILES[position[1]]}#{RANKS[position[0]]}"
+    else
+      @message = "Last move: #{piece.icon} #{FILES[position[1]]}#{RANKS[position[0]]}"
+    end
     @board[piece.position[0]][piece.position[1]] = nil
     @board[position[0]][position[1]] = piece
     piece.position = position
@@ -309,6 +319,7 @@ class ChessBoard
       end
       print "\n"
     end
+    puts @message
   end
 
 end
