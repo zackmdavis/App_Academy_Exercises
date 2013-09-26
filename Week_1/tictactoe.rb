@@ -71,6 +71,7 @@ class TicTacToeGame
       result = @board.evaluate
       if result
         @game_over = true
+        @board.show
         if result == 0 # first player win
           puts "Player 1 ('X') wins!"
           puts "Player 2 ('O') has been utterly defeated."
@@ -255,8 +256,7 @@ class GametreeNode
       @value = 0
     else
       #p @state
-      child_states = @state.possible_next_boards(
-           TicTacToeGame.turn_to_mark[turn])
+      child_states = @state.possible_next_boards(TicTacToeGame.turn_to_mark[turn])
       #p child_states
       @children = child_states.map do |state|
         GametreeNode.new(state, (turn + 1) % 2)
@@ -277,40 +277,22 @@ end
 # Currently under development!
 class ComputerTicTacToePlayer
 
-  attr_accessor :gametree_root
-
   def initialize(mark, turn)
     @mark = mark
     @turn = 1
     @gametree_root = nil
   end
 
-  # Build or reroot the game tree as necessary.
-  def gametree_surgery(board)
-    if @gametree_root.nil?
-      @gametree_root = GametreeNode.new(board, TicTacToeGame.mark_to_turn[@mark])
-    else
-      @gametree_root.children.each do |child|
-        if child.state == board
-          @gametree_root = child
-          break
-        end
-      end
-    end
-  end
-
   # Record the AI's move.
   def take_move(board)
     # For the first move, pick randomly (because searching the entire
     # game tree is expensive).
-    debugger
+    #debugger
     if board.legal_moves.length > 7
       return board.legal_moves.sample
     else
-      gametree_surgery(board)
-      if gametree_root.children.nil?
-        gametree_root.negamax_search
-      end
+      gametree_root = GametreeNode.new(board, @turn)
+      gametree_root.negamax_search
       if @turn == 0 # first player maximizing
         new_board_node = gametree_root.children.max do |child1, child2|
           child1.value <=> child2.value
@@ -320,7 +302,6 @@ class ComputerTicTacToePlayer
           child1.value <=> child2.value
         end
       end
-      @gametree_root = new_board_node
       move = TicTacToeBoard.move_to_achieve_state(board, new_board_node.state)
       move
     end
