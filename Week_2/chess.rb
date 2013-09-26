@@ -168,6 +168,68 @@ class HumanPlayer
 end
 
 
+# This class represents a node in a game tree for use by AI players.
+class GametreeNode
+
+  attr_accessor :value, :parent, :children
+  attr_reader   :state, :turn
+
+  def initialize(state, turn, value = nil, parent = nil, children = nil)
+    @state = state
+    @turn = turn
+    @value = value
+    @parent = parent
+    @children = children
+  end
+
+  # Minimax search down from this node.
+  def negamax_search(depth)
+    if depth == 0
+      return AIPlayer.heuristic_evaluation_function(state)
+    else
+      child_states = @state.
+      @children.
+      @children.each{ |child| child.negamax_search }
+      if turn == 0 # first player maximizing
+        @value = @children.map{ |child| child.value }.max
+      elsif turn == 1 # second player minimizing
+        @value = @children.map{ |child| child.value }.min
+      end
+    end
+    return @value
+  end
+
+end
+
+class AIPlayer
+
+  PIECE_VALUES = {Pawn => 1, Knight => 3, Bishop => 3, Rook => 5, Queen => 9}
+
+  def AIPlayer.heuristic_evaluation_function(board)
+    if ChessBoard.checkmated?(board, :black)
+      return 500
+    elsif ChessBoard.checkmated?(board, :white)
+      return -500
+    else
+      score = 0
+      board.board.each do |row|
+        row.each do |square|
+          unless square.nil?
+            piece = square
+            piece_value = PIECE_VALUES[piece.class]
+            player_multiplier = piece == :white ? 1 : -1
+            score += piece_value * player_multiplier
+          end
+        end
+      end
+      return score
+    end
+  end
+
+
+end
+
+
 class ChessBoard
 
   attr_accessor :board, :cursor_location, :possible_moves, :message
@@ -606,10 +668,4 @@ class Knight < SteppingPiece
   end
 end
 
-
-#begin
-  ChessGame.new
-# rescue
-#   puts $!
-#   puts caller[0..100]
-# end
+ChessGame.new
