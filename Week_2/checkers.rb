@@ -1,6 +1,10 @@
 require 'colorize'
 require 'ruby-debug'
 
+module Checkers
+
+PLAYER_NAMES = {:red => "Red Team", :black => "Black Team"}
+
 class CheckersGame
 
   PLAYER_COLORS = {0 => :red, 1 => :black}
@@ -12,7 +16,7 @@ class CheckersGame
 
   def setup
     @board = Checkerboard.new
-    @players = [HumanPlayer.new, HumanPlayer.new]
+    @players = [HumanPlayer.new(:red), HumanPlayer.new(:black)]
     @playing = 0
   end
 
@@ -22,33 +26,44 @@ class CheckersGame
       legal_moves = @board.legal_moves(PLAYER_COLORS[@playing])
       move = @players[@playing].get_move(legal_moves)
       @board.make_move(move)
+      @board.promotions
       @playing = (@playing + 1) % 2
     end
     @board.show
     winner, loser = @board.win?(:red) ? [:red, :black] : [:black, :red]
-    player_names = {:red => "Red Team", :black => "Black Team"}
-    puts "#{player_names[winner]} wins!! #{player_names[loser]} is destroyed"
+    puts "#{PLAYER_NAMES[winner]} wins!! #{PLAYER_NAMES[loser]} is destroyed"
   end
 
 end
 
 class HumanPlayer
 
+  def initialize(color)
+    @color = color
+  end
+
   def get_move(legal_moves)
     slides, jumps = legal_moves
     letters = ('A'..'Z').to_a
     letter_to_index = Hash[letters.zip((0..25).to_a)]
-    puts "Select a move from the list"
+    puts "#{PLAYER_NAMES[@color]}, select a move from the list"
     slides.each_with_index do |slide, i|
       puts "#{letters[i]}: #{slide[0]} -> #{slide[1]}"
     end
     jumps.each_with_index do |jump, i|
-      puts "#{letters[i+slides.length]}:" # TODO representation of jump
+      jump_string = ""
+      (0...jump.length-1).each do |jmp_pos|
+        jump_string += "#{jump[jmp_pos]} jmp "
+      end
+      jump_string += jump[-1].to_s
+      puts "#{letters[slides.length+i]}: #{jump_string}"
     end
+      #puts "#{letters[i+slides.length]}: #{jump[0]} jmp #{jump[1]}" # TODO representation of jump
     input = gets.chomp
     index = letter_to_index[input.upcase]
     jump = index >= slides.length
-    [jump, legal_moves[index]]
+    all_moves = legal_moves[0] + legal_moves[1]
+    [jump, all_moves[index]]
   end
 
 end
@@ -59,10 +74,12 @@ class Checkerboard
 
   ENEMY = {:red => :black, :black => :red}
 
-  def initialize
+  def initialize(blank = false)
     @board = Array.new(8){ Array.new(8) }
-    setup_checkers(0, :black)
-    setup_checkers(5, :red)
+    unless blank
+      setup_checkers(0, :black)
+      setup_checkers(5, :red)
+    end
   end
 
   def setup_checkers(from_row, color)
@@ -81,6 +98,20 @@ class Checkerboard
 
   def put(position, checker)
     @board[position[0]][position[1]] = checker
+  end
+
+  def dup
+    duplicate = Checkerboard.new(true)
+    (0..7).each do |row|
+      (0..7).each do |col|
+        position = [row, col]
+        checker = at(position)
+        if checker
+          duplicate.put(position, Checker.new(checker.color, checker.royalty))
+        end
+      end
+    end
+    duplicate
   end
 
   def show
@@ -128,15 +159,36 @@ class Checkerboard
     Checkerboard.slide_destiny(position, direction.map { |coordinate| 2 * coordinate } )
   end
 
+  def Checkerboard.jumped_square(start, finish)
+    offset = [(finish[0]-start[0])/2, (finish[1]-start[1])/2]
+    Checkerboard.slide_destiny(start, offset)
+  end
+
+  def promotions
+    [0, 7].each do |row|
+      (0..7).each do |col|
+        position = [row, col]
+        checker = at(position)
+        if at(position)
+          if (checker.color == :red) and (row == 0) and (!checker.royalty)
+            checker.royalty = true
+          elsif (checker.color == :black) and (row == 7) and (!checker.royalty)
+            checker.royalty = true
+          end
+        end
+      end
+    end
+  end
+
   def checker_moves(position)
     checker = at(position)
     color, royalty = checker.color, checker.royalty
     if royalty
       directions = [[-1, -1], [-1, 1], [1, 1], [1, -1]]
     elsif color == :red
-      directions = [[-1, -1], [1, -1]]
+      directions = [[-1, -1], [-1, 1]]
     elsif color == :black
-      directions = [[-1, 1], [1, 1]]
+      directions = [[1, -1], [1, 1]]
     end
     directions.select! { |direction| Checkerboard.in_bounds?(Checkerboard.slide_destiny(position, direction)) }
 
@@ -168,7 +220,25 @@ class Checkerboard
           slide_candidates.each do |slide|
             slides.push([position, slide])
           end
-          # TODO jumps and n-tuple jumps
+          jump_candidates.each do |jump|
+            jumps.push([position, jump])
+          end
+        end
+      end
+    end
+    # check for multijumps
+    more_jumps_maybe = true
+    while more_jumps_maybe
+      more_jumps_maybe = false
+      previous_jump_record = jumps.map { |jump_seq| jump_seq.length }.max
+      previous_record_jumps = jumps.select { |jump_seq| jump_seq.length == previous_jump_record }
+      previous_record_jumps.each do |jump_seq|
+        next_board = self.dup
+        next_board.make_move([true, jump_seq])
+        _, multijump_candidates = next_board.checker_moves(jump_seq[-1])
+        multijump_candidates.each do |jump|
+          jumps.push(jump_seq + [jump])
+          more_jumps_maybe = true
         end
       end
     end
@@ -185,20 +255,29 @@ class Checkerboard
 
   def slide(positions)
     checker = at(positions[0])
-    set(positions[1], checker)
-    set(positions[0], nil)
+    put(positions[1], checker)
+    put(positions[0], nil)
   end
 
+
   def jump(positions)
-    # TODO
+    checker = at(positions[0])
+    put(positions[-1], checker)
+    put(positions[0], nil)
+    (0...positions.length-1).each do |jump_index|
+      put(Checkerboard.jumped_square(positions[jump_index], positions[jump_index+1]), nil)
+    end
   end
 
   def win?(color)
-    legal_moves(ENEMY[color]).empty?
+    enemy_moves = legal_moves(ENEMY[color])
+    enemy_moves[0].empty? and enemy_moves[1].empty?
   end
 
 end
 
+end # end Checkers module
+
 if __FILE__ == $PROGRAM_NAME
-  CheckersGame.new
+  Checkers::CheckersGame.new
 end
