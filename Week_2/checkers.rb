@@ -6,6 +6,12 @@ module Checkers
 # Player names
 PLAYER_NAMES = {:red => "Red Team", :black => "Black Team"}
 
+# Moves are represented as a struct with a +moves+ attribute (a boolean
+# indicating whether this is a jump move) and a +positions+ attribute
+# (indicating the sequence of positions the checker will occupy during this
+# move).
+Move = Struct.new("Move", :jump, :positions)
+
 # A game of checkers.
 class CheckersGame
 
@@ -29,22 +35,34 @@ class CheckersGame
   # Play the game.
   def play
     until @board.win?(:red) or @board.win?(:black)
+      system("clear")
       @board.show
       legal_moves = @board.legal_moves(PLAYER_COLORS[@playing])
-      move = @players[@playing].get_move(legal_moves)
+      begin
+        move = @players[@playing].get_move(legal_moves)
+      rescue Exception => e
+        puts "That's not valid input"
+        sleep 1
+        next
+      end
       @board.make_move(move)
       @board.promotions
       @playing = (@playing + 1) % 2
     end
     @board.show
     winner, loser = @board.win?(:red) ? [:red, :black] : [:black, :red]
-    puts "#{PLAYER_NAMES[winner]} wins!! #{PLAYER_NAMES[loser]} is destroyed"
+    puts "#{PLAYER_NAMES[winner]} wins!! #{PLAYER_NAMES[loser]} is destroyed forever"
   end
 
 end
 
 # A human player for our checkers game.
 class HumanPlayer
+
+  # The alphabet in an array
+  LETTERS = ('A'..'Z').to_a
+  # This hash maps the alphabet to the integers 0 through 25
+  LETTER_TO_INDEX = Hash[LETTERS.zip((0..25).to_a)]
 
   # Initialize the player class with a piece-color symbol.
   def initialize(color)
@@ -57,11 +75,24 @@ class HumanPlayer
   # the move itself.
   def get_move(legal_moves)
     slides, jumps = legal_moves
-    letters = ('A'..'Z').to_a
-    letter_to_index = Hash[letters.zip((0..25).to_a)]
+    display_legal_moves(slides, jumps)
+    input = gets.chomp.upcase
+    index = LETTER_TO_INDEX[input]
+    jump = index >= slides.length
+    all_moves = slides + jumps
+    position_sequence = all_moves[index]
+    if position_sequence.nil?
+      raise RuntimeError
+    end
+    Checkers::Move.new(jump, all_moves[index])
+  end
+
+  protected
+
+  def display_legal_moves(slides, jumps)
     puts "#{PLAYER_NAMES[@color]}, select a move from the list"
     slides.each_with_index do |slide, i|
-      puts "#{letters[i]}: #{slide[0]} -> #{slide[1]}"
+      puts "#{LETTERS[i]}: #{slide[0]} -> #{slide[1]}"
     end
     jumps.each_with_index do |jump, i|
       jump_string = ""
@@ -69,13 +100,8 @@ class HumanPlayer
         jump_string += "#{jump[jmp_pos]} jmp "
       end
       jump_string += jump[-1].to_s
-      puts "#{letters[slides.length+i]}: #{jump_string}"
+      puts "#{LETTERS[slides.length+i]}: #{jump_string}"
     end
-    input = gets.chomp
-    index = letter_to_index[input.upcase]
-    jump = index >= slides.length
-    all_moves = legal_moves[0] + legal_moves[1]
-    [jump, all_moves[index]]
   end
 
 end
@@ -84,7 +110,7 @@ end
 class Checkerboard
 
   # Individual checkers are represented as a struct with a +color+
-  # element and a +royalty+ element.
+  # attribute and a +royalty+ attribute.
   Checker = Struct.new("Checker", :color, :royalty)
 
   # This hash maps a piece-color symbol to that of the opposing player.
@@ -155,15 +181,15 @@ class Checkerboard
         unless checker.nil?
           if checker.color == :black
             unless checker.royalty
-              print "\u2B24 ".colorize(:background => :cyan, :color => :black)
+              print "\u2B24 ".colorize(:background => :cyan, :color => :black) # circle
             else
-              print "\u265B ".colorize(:background => :cyan, :color => :black)
+              print "\u265B ".colorize(:background => :cyan, :color => :black) # crown
             end
           elsif at([row, col]).color == :red
             unless checker.royalty
-              print "\u2B24 ".colorize(:background => :cyan, :color => :light_red)
+              print "\u2B24 ".colorize(:background => :cyan, :color => :light_red) # circle
             else
-              print "\u265B ".colorize(:background => :cyan, :color => :light_red)
+              print "\u265B ".colorize(:background => :cyan, :color => :light_red) # crown
             end
           end
         else
@@ -177,6 +203,64 @@ class Checkerboard
       print "\n"
     end
   end
+
+  # Performs any needed king promotions.
+  def promotions
+    [0, 7].each do |row|
+      (0..7).each do |col|
+        position = [row, col]
+        checker = at(position)
+        if at(position)
+          if (checker.color == :red) and (row == 0) and (!checker.royalty)
+            checker.royalty = true
+          elsif (checker.color == :black) and (row == 7) and (!checker.royalty)
+            checker.royalty = true
+          end
+        end
+      end
+    end
+  end
+
+  # Given a piece-color symbol, returns an array of valid slide and jump
+  # move position-sequences available to that player.
+  def legal_moves(color)
+    slides = []
+    jumps = []
+    (0..7).each do |row|
+      (0..7).each do |col|
+        position = [row, col]
+        checker = at(position)
+        if !checker.nil? and checker.color == color
+          slide_candidates, jump_candidates = checker_moves(position)
+          slide_candidates.each do |slide|
+            slides.push([position, slide])
+          end
+          jump_candidates.each do |jump|
+            jumps.push([position, jump])
+          end
+        end
+      end
+    end
+    jumps = add_multijumps(jumps)
+    [slides, jumps]
+  end
+
+  # Given a +Move+ struct, makes the move on the board.
+  def make_move(move)
+    unless move.jump
+      slide(move.positions)
+    else
+      jump(move.positions)
+    end
+  end
+
+  # Has the player with piece-color +color+ won??
+  def win?(color)
+    enemy_moves = legal_moves(ENEMY[color])
+    enemy_moves[0].empty? and enemy_moves[1].empty?
+  end
+
+  protected
 
   # Returns boolean indicating if supplied position is in bounds.
   def Checkerboard.in_bounds?(position)
@@ -202,39 +286,13 @@ class Checkerboard
     Checkerboard.slide_destiny(start, offset)
   end
 
-  # Performs any needed king promotions.
-  def promotions
-    [0, 7].each do |row|
-      (0..7).each do |col|
-        position = [row, col]
-        checker = at(position)
-        if at(position)
-          if (checker.color == :red) and (row == 0) and (!checker.royalty)
-            checker.royalty = true
-          elsif (checker.color == :black) and (row == 7) and (!checker.royalty)
-            checker.royalty = true
-          end
-        end
-      end
-    end
-  end
-
   # Given the position of a checker, returns a two-element array of positions
   # the checker could slide and jump to, respectively.
   def checker_moves(position)
     checker = at(position)
+    color = checker.color
     # First, get the direction that this kind of checker can move it.
-    color, royalty = checker.color, checker.royalty
-    if royalty
-      directions = [[-1, -1], [-1, 1], [1, 1], [1, -1]]
-    elsif color == :red
-      directions = [[-1, -1], [-1, 1]]
-    elsif color == :black
-      directions = [[1, -1], [1, 1]]
-    end
-    # Filter for being in-bounds.
-    directions.select! { |direction| Checkerboard.in_bounds?(Checkerboard.slide_destiny(position, direction)) }
-
+    directions = checker_directions(position, checker)
     slides = []
     jumps = []
     directions.each do |direction|
@@ -255,32 +313,23 @@ class Checkerboard
     [slides, jumps]
   end
 
-  # Given a piece-color symbol, returns an array of valid slide and jump moves
-  # available to that player.
-  def legal_moves(color)
-    slides = []
-    jumps = []
-    (0..7).each do |row|
-      (0..7).each do |col|
-        position = [row, col]
-        checker = at(position)
-        if !checker.nil? and checker.color == color
-          slide_candidates, jump_candidates = checker_moves(position)
-          slide_candidates.each do |slide|
-            slides.push([position, slide])
-          end
-          jump_candidates.each do |jump|
-            jumps.push([position, jump])
-          end
-        end
-      end
+  # In-bounds directions given a checker and its position.
+  def checker_directions(position, checker)
+    color, royalty = checker.color, checker.royalty
+    if royalty
+      directions = [[-1, -1], [-1, 1], [1, 1], [1, -1]]
+    elsif color == :red
+      directions = [[-1, -1], [-1, 1]]
+    elsif color == :black
+      directions = [[1, -1], [1, 1]]
     end
-    jumps = add_multijumps(jumps)
-    [slides, jumps]
+    # Filter for being in-bounds.
+    directions.select! { |direction| Checkerboard.in_bounds?(Checkerboard.slide_destiny(position, direction)) }
+    directions
   end
 
-  # Given an array of jump moves, appends legal multijump moves to it and
-  # returns.
+  # Given an array of jump move position-sequences, appends
+  # implied legal multijump moves to it and returns.
   def add_multijumps(jumps)
     more_jumps_maybe = true
     while more_jumps_maybe
@@ -289,7 +338,7 @@ class Checkerboard
       previous_record_jumps = jumps.select { |jump_seq| jump_seq.length == previous_jump_record }
       previous_record_jumps.each do |jump_seq|
         next_board = self.dup
-        next_board.make_move([true, jump_seq])
+        next_board.make_move(Checkers::Move.new(true, jump_seq))
         _, multijump_candidates = next_board.checker_moves(jump_seq[-1])
         multijump_candidates.each do |jump|
           jumps.push(jump_seq + [jump])
@@ -300,21 +349,14 @@ class Checkerboard
     jumps
   end
 
-  def make_move(move)
-    unless move[0]
-      slide(move[1])
-    else
-      jump(move[1])
-    end
-  end
-
+  # A helper function for +make_move+; carries out a slide move.
   def slide(positions)
     checker = at(positions[0])
     put(positions[1], checker)
     put(positions[0], nil)
   end
 
-
+  # A helper function for +make_move+; carries out a jump move.
   def jump(positions)
     checker = at(positions[0])
     put(positions[-1], checker)
@@ -322,12 +364,6 @@ class Checkerboard
     (0...positions.length-1).each do |jump_index|
       put(Checkerboard.jumped_square(positions[jump_index], positions[jump_index+1]), nil)
     end
-  end
-
-  # Has the player with piece-color +color+ won??
-  def win?(color)
-    enemy_moves = legal_moves(ENEMY[color])
-    enemy_moves[0].empty? and enemy_moves[1].empty?
   end
 
 end
