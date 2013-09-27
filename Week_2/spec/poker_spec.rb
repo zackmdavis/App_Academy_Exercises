@@ -99,8 +99,6 @@ describe "Hand" do
 
   it "should compare hands appropriately" do
     (0...test_hands.length - 1).each do |i|
-      p test_hands[i+1]
-      p test_hands[i].cards
       test_hands[i+1].defeats?(test_hands[i]).should == true
     end
   end

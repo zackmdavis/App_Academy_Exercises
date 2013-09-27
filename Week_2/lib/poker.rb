@@ -40,17 +40,6 @@ class Hand
     puts
   end
 
-  def most_of_same_rank
-    most = 1
-    @cards.each do | special_card |
-      special_count = @cards.select { |card| card.rank == special_card.rank }.count
-      if special_count > most
-        most = special_count
-      end
-    end
-    most
-  end
-
   def rank_counts
     counts = Hash.new(0)
     @cards.each do |card|
@@ -59,27 +48,32 @@ class Hand
     counts
   end
 
-  def one_pair?
-    most_of_same_rank == 2
-  end
-
-  def two_pair?
-    pair_ranks = []
-    @cards.each do |card|
-      if @cards.select { |other_card| other_card.rank == card.rank }.count == 2
-        pair_ranks.push(card.rank) unless pair_ranks.include?(card.rank)
-      end
+  def one_pair
+    if rank_counts.values.max == 2
+      rank_of_pair = rank_counts.key(2)
+      other_ranks = @cards.map{ |card| card.rank }.reject { |r| r == rank_of_pair }.sort.reverse
+      return [rank_of_pair] + other_ranks
+    else
+      return false
     end
-    puts pair_ranks
-    pair_ranks.count == 2
   end
 
-  def three_of_kind?
-    most_of_same_rank == 3
+  def two_pair
+    if rank_counts.values.sort[-2..-1] == [2, 2]
+      ranks_of_pairs = rank_counts.select{ |rank, count| count == 2 }.map{ |rank, _| rank }.sort.reverse
+      other_rank = rank_counts.keys.reject{ |rank| ranks_of_pairs.include?(rank) }
+      return ranks_of_pairs + other_rank
+    else
+      return false
+    end
   end
 
-  def straight?
-    sorted_cards = cards.sort(&:rank)
+  def three_of_kind
+    rank_counts.values.max == 3
+  end
+
+  def straight
+    sorted_cards = cards.sort { |card1, card2| card1.rank <=> card2.rank }
     (0..3).each do |i|
       if sorted_cards[i+1].rank - sorted_cards[i].rank != 1
         return false
@@ -88,41 +82,61 @@ class Hand
     return true
   end
 
-  def flush?
+  def flush
     first_suit = @cards[0].suit
     @cards.all? { |card| card.suit == first_suit }
   end
 
-  def full_house?
+  def full_house
     rank_counts.values.sort == [2, 3]
   end
 
-  def four_of_kind?
-    most_of_same_rank == 4
+  def four_of_kind
+    rank_counts.values.max == 4
   end
 
-  def straight_flush?
+  def straight_flush
+    flush and straight
+  end
 
-    flush? and straight?
+  def score
+    if straight_flush
+      return [10, straight_flush]
+    elsif four_of_kind
+      return [9, four_of_kind]
+    elsif full_house
+      return [8, full_house]
+    elsif flush
+      return [7, flush]
+    elsif straight
+      return [6, straight]
+    elsif three_of_kind
+      return [5, three_of_kind]
+    elsif two_pair
+      return [4, two_pair]
+    elsif one_pair
+      return [3, one_pair]
+    else
+      return [2, @cards.map{ |card| card.rank }.sort.reverse]
+    end
   end
 
   def defeats?(other_hand)
-    hand_outcomes = [ Proc.new{ |hand| hand.straight_flush? },
-      Proc.new{ |hand| hand.four_of_kind? },
-      Proc.new{ |hand| hand.full_house? },
-      Proc.new{ |hand| hand.flush? },
-      Proc.new{ |hand| hand.straight? },
-      Proc.new{ |hand| hand.three_of_kind? },
-      Proc.new{ |hand| hand.two_pair? },
-      Proc.new{ |hand| hand.one_pair? }]
-    hand_outcomes.each do |outcome|
-      if outcome.call(other_hand) and !outcome.call(self)
-        return false
-      elsif !outcome.call(other_hand) and outcome.call(self)
-        return true
-      else
-        raise "We didn't implement tiebreaking yet!!"
+    my_score = score
+    their_score = other_hand.score
+    if my_score[0] > their_score[0]
+      return true
+    elsif my_score[0] < their_score[0]
+      return false
+    else
+      (0...my_score[1].length).each do |i|
+        if my_score[1][i] > their_score[1][i]
+          return true
+        elsif my_score[1][i] < their_score[1]
+          return false
+        end
       end
+      raise "Miraculous tie!!"
     end
   end
 
