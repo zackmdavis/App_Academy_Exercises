@@ -1,6 +1,7 @@
 require 'colorize'
 require 'debugger'
 
+# A classic game of chess.
 class ChessGame
 
   def initialize
@@ -8,12 +9,14 @@ class ChessGame
     play
   end
 
+  # Set up the board and players.
   def setup
     @board = ChessBoard.new
     @player1 = HumanPlayer.new(@board, :white)
     @player2 = HumanPlayer.new(@board, :black)
   end
 
+  # Play the game.
   def play
     white_playing = true
     playing = @player1
@@ -43,6 +46,7 @@ class ChessGame
 
 end
 
+# This class represents a human chess player.
 class HumanPlayer
 
   def initialize(board, color)
@@ -50,6 +54,7 @@ class HumanPlayer
     @color = color
   end
 
+  # Gets a single keypress.
   def get_char
     # Thanks to http://stackoverflow.com/questions/8142901/ruby-stdin-getc-does-not-read-char-on-reception
     begin
@@ -61,6 +66,7 @@ class HumanPlayer
     str.chr
   end
 
+  # Converts keypress outcome into a command.
   def get_command
     while true
       command = get_char.downcase
@@ -84,6 +90,7 @@ class HumanPlayer
     end
   end
 
+  # Moves the cursor.
   def move_cursor(command_key)
     new_location = @board.cursor_location.dup
     case command_key
@@ -102,6 +109,7 @@ class HumanPlayer
     end
   end
 
+  # Queries the user for the desired promotion, and performs the promotion.
   def promote_pawn
     puts "What would you like to promote the pawn to?"
     puts "(Q = Queen, K = Knight, R = Rook, B = Bishop)"
@@ -122,6 +130,7 @@ class HumanPlayer
       "#{ChessBoard::RANKS[@selected_piece.position[0]]} = #{promoted.icon}"
   end
 
+  # Uses user input to select a move.
   def select_move
     unless get_command
       @board.possible_moves = []
@@ -148,6 +157,7 @@ class HumanPlayer
     true
   end
 
+  # Uses user input to select a piece.
   def select_piece
     while true
       break if get_command
@@ -168,8 +178,10 @@ class HumanPlayer
 end
 
 
-# This class represents a node in a game tree for use by AI players.
+# A node in a game tree for use by AI players.
 class GametreeNode
+
+  TURN_TO_COLOR = {0 => :white, 1 => :black}
 
   attr_accessor :value, :parent, :children
   attr_reader   :state, :turn
@@ -185,15 +197,19 @@ class GametreeNode
   # Minimax search down from this node.
   def negamax_search(depth)
     if depth == 0
-      return AIPlayer.heuristic_evaluation_function(state)
+      @value = AIPlayer.heuristic_evaluation_function(state)
     else
-      child_states = @state.
-      @children.
-      @children.each{ |child| child.negamax_search }
-      if turn == 0 # first player maximizing
-        @value = @children.map{ |child| child.value }.max
-      elsif turn == 1 # second player minimizing
-        @value = @children.map{ |child| child.value }.min
+      child_states = ChessBoard.possible_next_boards(@state, TURN_TO_COLOR[(@turn + 1) % 2])
+      if child_states.empty?
+        @value = AIPlayer.heuristic_evaluation_function(state)
+      else
+        @children = child_states.map{ |state| GametreeNode.new(state, (@turn + 1) % 2) }
+        @children.each { |child| child.negamax_search }
+        if turn == 0 # first player maximizing
+          @value = @children.map { |child| child.value }.max
+        elsif turn == 1 # second player minimizing
+          @value = @children.map { |child| child.value }.min
+        end
       end
     end
     return @value
@@ -225,7 +241,6 @@ class AIPlayer
       return score
     end
   end
-
 
 end
 
@@ -362,6 +377,19 @@ class ChessBoard
 
     piece.position = position
     self
+  end
+
+  def ChessBoard.possible_next_boards(board, color)
+    next_boards = []
+    board.each_of_color(color) do |piece|
+      position = piece.position
+      piece.legal_moves.each do |move|
+        next_board = board.dup
+        next_board.make_move(next_board.at(position), move)
+        next_boards.push(next_board)
+      end
+    end
+    next_boards
   end
 
   def ChessBoard.find_king(board, color)
@@ -668,4 +696,6 @@ class Knight < SteppingPiece
   end
 end
 
-ChessGame.new
+if __FILE__ == $PROGRAM_NAME
+  ChessGame.new
+end
