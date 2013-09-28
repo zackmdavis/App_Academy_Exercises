@@ -117,7 +117,7 @@ end
 
 describe "Player" do
 
-  subject(:player) { Player.new(Deck.new) }
+  subject(:player) { Player.new("Rebecca", Deck.new) }
 
 
   it "should be able to discard" do
@@ -139,7 +139,7 @@ describe "Game" do
 
   subject(:game) { PokerGame.new }
   let(:player) { Player.new(game.deck) }
-
+  let(:test_win_game) { PokerGame.new }
 
   it "should know whose turn it is" do
     game.should respond_to(:turn)
@@ -149,6 +149,14 @@ describe "Game" do
     game.pot.class.should == Fixnum
   end
 
+  it "should run a round of betting" do
+    game.betting_round
+    ((game.current_bet - 1) % 7).should == 0
+  end
+
+  it "should play a game" do
+    game.play
+  end
 
 
 end

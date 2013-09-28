@@ -2,20 +2,59 @@ class PokerGame
 
   attr_accessor :turn, :pot, :current_bet
 
-  def initialize
-    setup
-    play
-  end
+  NUMBER_OF_PLAYERS = 3
+  DEFAULT_NAMES = ["Twilight Sparkle", "Rainbow Dash", "Larry"]
 
-  def setup
+  def initialize
     @turn = 0
     @pot = 0
     @current_bet = 1
-    # TODO
+    @deck = Deck.new
+    @players = []
+    NUMBER_OF_PLAYERS.times do |i|
+      @players.push(Player.new(DEFAULT_NAMES[i], @deck))
+    end
   end
 
   def play
-    # TODO
+    betting_round
+    discard_round
+    betting_round
+    determine_winner
+  end
+
+  def betting_round
+    still_playing = @players.reject { |player| player.folded }
+    still_playing.each do |player|
+      action = player.prompt(@current_bet)
+      if action
+        @pot += action
+        if action > @current_bet
+          @current_bet = action
+        end
+      end
+    end
+  end
+
+  def discard_round
+    still_playing = @players.reject { |player| player.folded }
+    still_playing.each do |player|
+      player.select_discards
+    end
+  end
+
+  def determine_winner
+    still_playing = @players.reject { |player| player.folded }
+    until still_playing.count == 1
+      if still_playing[0].hand.defeats?(still_playing[1].hand)
+        still_playing.delete_at(1)
+      else
+        still_playing.delete_at(0)
+      end
+    end
+    winnner = still_playing[0]
+    puts "#{winner.name} is the winner!! everyone else is destroyed"
+    return winner
   end
 
 end
@@ -183,11 +222,26 @@ end
 
 class Player
 
-  attr_accessor :hand
+  attr_accessor :name, :hand, :folded, :bet, :raised
 
-  def initialize(deck)
+  def initialize(name, deck)
+    @name = name
+    @money = 500
     @deck = deck
     @hand = Hand.new(@deck.draw_n(5))
+    @folded = false
+    @bet = 0
+    @raised = false
+  end
+
+  def select_discards
+    max_number_to_discard = rand(0..3)
+    to_discard = []
+    max_number_to_discard.times do
+      discard_index = rand(0..4)
+      to_discard.push(@hand.cards[discard_index])
+    end
+    to_discard.uniq
   end
 
   def discard(discards)
@@ -199,9 +253,18 @@ class Player
     @hand = Hand.new(cards)
   end
 
-
-  def prompt
+  # player randomly folds, sees, or raises
+  def prompt(current_bet)
+    action = [false, current_bet, current_bet+7].sample
+    if !action
+      @folded = true
+    elsif action == current_bet
+      @bet = action
+    elsif action > current_bet
+      @bet = action
+      raised = true
+    end
+    action
   end
-
 
 end
