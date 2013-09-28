@@ -1,5 +1,23 @@
 class PokerGame
 
+  attr_accessor :turn, :pot, :current_bet
+
+  def initialize
+    setup
+    play
+  end
+
+  def setup
+    @turn = 0
+    @pot = 0
+    @current_bet = 1
+    # TODO
+  end
+
+  def play
+    # TODO
+  end
+
 end
 
 class Card
@@ -33,12 +51,6 @@ class Hand
     @cards = cards
   end
 
-  def pretty_print
-    @cards.each do |card|
-      print card.pretty_print, " "
-    end
-    puts
-  end
 
   def rank_counts
     counts = Hash.new(0)
@@ -132,7 +144,7 @@ class Hand
       (0...my_score[1].length).each do |i|
         if my_score[1][i] > their_score[1][i]
           return true
-        elsif my_score[1][i] < their_score[1]
+        elsif my_score[1][i] < their_score[1][i]
           return false
         end
       end
@@ -155,9 +167,9 @@ class Deck
     @cards.pop
   end
 
-  def draw_five
+  def draw_n(n)
     drawn = []
-    5.times do
+    n.times do
       drawn.push(draw)
     end
     drawn
@@ -169,6 +181,27 @@ class Deck
 end
 
 
-
 class Player
+
+  attr_accessor :hand
+
+  def initialize(deck)
+    @deck = deck
+    @hand = Hand.new(@deck.draw_n(5))
+  end
+
+  def discard(discards)
+    cards = @hand.cards
+    cards = cards.reject{ |card| discards.include?(card) }
+    need_to_draw = 5 - cards.count
+    cards.push(@deck.draw_n(need_to_draw))
+    cards.flatten!
+    @hand = Hand.new(cards)
+  end
+
+
+  def prompt
+  end
+
+
 end

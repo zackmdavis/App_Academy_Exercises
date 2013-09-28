@@ -39,7 +39,7 @@ describe "Deck" do
   end
 
   it "should let us draw five cards" do
-    sample_deck.draw_five.count.should == 5
+    sample_deck.draw_n(5).count.should == 5
   end
 
 end
@@ -58,6 +58,12 @@ describe "Hand" do
                       [:heart, 4],
                       [:diamond, 4],
                       [:heart, 5]].map{ |suit, rank| Card.new(suit, rank) }) }
+  let(:test_twopair2) { Hand.new([[:diamond, 2],
+                      [:spade, 2],
+                      [:diamond, 4],
+                      [:heart, 4],
+                      [:heart, 6]].map{ |suit, rank| Card.new(suit, rank) }) }
+
   let(:test_threekind) { Hand.new([[:heart, 2],
                       [:club, 2],
                       [:heart, 2],
@@ -93,7 +99,7 @@ describe "Hand" do
 
 
   it "should initialize from deck with five cards" do
-    new_hand = Hand.new(sample_deck.draw_five)
+    new_hand = Hand.new(sample_deck.draw_n(5))
     new_hand.cards.count == 5
   end
 
@@ -103,14 +109,24 @@ describe "Hand" do
     end
   end
 
+  it "should cope with tiebreaking" do
+    expect(test_twopair2.defeats?(test_twopair)).to eq(true)
+  end
+
 end
 
 describe "Player" do
 
-  subject(:player) { Player.new }
+  subject(:player) { Player.new(Deck.new) }
+
 
   it "should be able to discard" do
-    player.discard.class.should == Card
+    to_discard = player.hand.cards[0..1]
+    player.discard(to_discard)
+    to_discard.each do |discard|
+      expect(player.hand.cards.include?(discard)).to be_false
+    end
+    player.hand.cards.count.should == 5
   end
 
   it "should respond to prompt (to fold, see, or raise)" do
@@ -122,10 +138,8 @@ end
 describe "Game" do
 
   subject(:game) { PokerGame.new }
+  let(:player) { Player.new(game.deck) }
 
-  it "should have a deck" do
-    game.deck.class.should == Deck
-  end
 
   it "should know whose turn it is" do
     game.should respond_to(:turn)
@@ -134,5 +148,7 @@ describe "Game" do
   it "should be able to report how much is in the pot" do
     game.pot.class.should == Fixnum
   end
+
+
 
 end
