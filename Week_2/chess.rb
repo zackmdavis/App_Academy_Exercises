@@ -1,6 +1,8 @@
 require 'colorize'
 require 'debugger'
 
+module Chess
+
 # A classic game of chess.
 class ChessGame
 
@@ -13,7 +15,8 @@ class ChessGame
   def setup
     @board = ChessBoard.new
     @player1 = HumanPlayer.new(@board, :white)
-    @player2 = HumanPlayer.new(@board, :black)
+    # @player2 = HumanPlayer.new(@board, :black)
+    @player2 = AIPlayer.new(@board, :black)
   end
 
   # Play the game.
@@ -21,11 +24,15 @@ class ChessGame
     white_playing = true
     playing = @player1
     until ChessBoard.checkmated?(@board, :white) or ChessBoard.checkmated?(@board, :black)
-      while true
-        @board.show
-        playing.select_piece
-        @board.show
-        break if playing.select_move
+      if playing == @player1
+        while true
+          @board.show
+          playing.select_piece
+          @board.show
+          break if playing.select_move
+        end
+      elsif playing == @player2
+        playing.select_move
       end
 
       case white_playing
@@ -183,14 +190,15 @@ class GametreeNode
 
   TURN_TO_COLOR = {0 => :white, 1 => :black}
 
-  attr_accessor :value, :parent, :children
+  attr_accessor :value, :parent, :children, :previous_move
   attr_reader   :state, :turn
 
-  def initialize(state, turn, value = nil, parent = nil, children = nil)
+  def initialize(state, turn, value = nil, parent = nil, previous_move = nil, children = nil)
     @state = state
     @turn = turn
     @value = value
     @parent = parent
+    @previous_move = previous_move
     @children = children
   end
 
@@ -199,12 +207,17 @@ class GametreeNode
     if depth == 0
       @value = AIPlayer.heuristic_evaluation_function(state)
     else
-      child_states = ChessBoard.possible_next_boards(@state, TURN_TO_COLOR[(@turn + 1) % 2])
-      if child_states.empty?
+      child_boards = ChessBoard.possible_next_boards(@state, TURN_TO_COLOR[(@turn + 1) % 2])
+      if child_boards.empty?
         @value = AIPlayer.heuristic_evaluation_function(state)
       else
-        @children = child_states.map{ |state| GametreeNode.new(state, (@turn + 1) % 2) }
-        @children.each { |child| child.negamax_search }
+        @children = child_boards.map do |board| 
+          child = GametreeNode.new(board[1], (@turn + 1) % 2)
+          child.parent = self
+          child.previous_move = board[0]
+          child
+        end
+        @children.each { |child| child.negamax_search(depth-1) }
         if turn == 0 # first player maximizing
           @value = @children.map { |child| child.value }.max
         elsif turn == 1 # second player minimizing
@@ -217,9 +230,15 @@ class GametreeNode
 
 end
 
+
 class AIPlayer
 
-  PIECE_VALUES = {Pawn => 1, Knight => 3, Bishop => 3, Rook => 5, Queen => 9}
+  PIECE_VALUES = {"Chess::Pawn" => 1, "Chess::Knight" => 3, "Chess::Bishop" => 3, "Chess::Rook" => 5, "Chess::Queen" => 9, "Chess::King" => 1}
+
+  def initialize(board, color)
+    @board = board
+    @color = color
+  end
 
   def AIPlayer.heuristic_evaluation_function(board)
     if ChessBoard.checkmated?(board, :black)
@@ -232,8 +251,10 @@ class AIPlayer
         row.each do |square|
           unless square.nil?
             piece = square
-            piece_value = PIECE_VALUES[piece.class]
-            player_multiplier = piece == :white ? 1 : -1
+            piece_value = PIECE_VALUES[piece.class.to_s]
+            p piece
+            p piece.class.to_s
+            player_multiplier = (piece == :white) ? 1 : -1
             score += piece_value * player_multiplier
           end
         end
@@ -242,8 +263,18 @@ class AIPlayer
     end
   end
 
-end
+  def select_move
+    # At the moment, let's just assume the AI is the second player
+    gametree_root = GametreeNode.new(@board, 1)
+    gametree_root.negamax_search(2)
+    move_node = gametree_root.children.find do |child|
+      child.value == gametree_root.value
+    end
+    piece, move = move_node.previous_move
+    @board.make_move(piece, move)
+  end
 
+end
 
 class ChessBoard
 
@@ -386,7 +417,7 @@ class ChessBoard
       piece.legal_moves.each do |move|
         next_board = board.dup
         next_board.make_move(next_board.at(position), move)
-        next_boards.push(next_board)
+        next_boards.push([[piece, move], next_board])
       end
     end
     next_boards
@@ -696,6 +727,8 @@ class Knight < SteppingPiece
   end
 end
 
+end # end chess module
+
 if __FILE__ == $PROGRAM_NAME
-  ChessGame.new
+  Chess::ChessGame.new
 end
