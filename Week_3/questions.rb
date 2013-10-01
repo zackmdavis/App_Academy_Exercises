@@ -14,7 +14,7 @@ end
 
 class User
 
-  attr_accessor :user_id, :first, :last
+  attr_accessor :first, :last
 
   def initialize(options = {})
     @user_id = options["user_id"]
@@ -22,20 +22,20 @@ class User
     @last = options["last"]
   end
 
-  def User.find_by_id(id_to_find)
+  def self.find_by_id(id_to_find)
     query = %Q[
       SELECT * FROM
         users
-      WHERE user_id = #{id_to_find};]
-    User.new(QuestionsDatabase.instance.execute(query)[0])
+      WHERE user_id = ?;]
+    user_object = User.new(QuestionsDatabase.instance.execute(query, id_to_find)[0])
   end
 
-  def User.find_by_name(first, last)
+  def self.find_by_name(first, last)
     query = %Q[
       SELECT * FROM
         users
-      WHERE first = '#{first}' AND last = '#{last}']
-    QuestionsDatabase.instance.execute(query).map { |options| User.new(options) }
+      WHERE first = ? AND last = ?]
+    QuestionsDatabase.instance.execute(query, first, last).map { |options| User.new(options) }
   end
 
   def create
@@ -52,10 +52,10 @@ class User
   def save
     query = %Q[
       UPDATE users
-      SET first = '#{@first}',
-          last = '#{@last}'
-      WHERE user_id = #{@user_id}]
-    QuestionsDatabase.instance.execute(query)
+      SET first = ?,
+          last = ?
+      WHERE user_id = ?]
+    QuestionsDatabase.instance.execute(query, @first, @last, @user_id)
     self
   end
 
@@ -64,8 +64,8 @@ class User
       SELECT * FROM
         questions
       WHERE
-        author_id = #{@user_id}]
-    QuestionsDatabase.instance.execute(query).map { |options| Question.new(options) }
+        author_id = ?]
+    QuestionsDatabase.instance.execute(query, @user_id).map { |options| Question.new(options) }
   end
 
   def followed_questions
@@ -97,27 +97,38 @@ class Question
     query = %Q[
       SELECT * FROM
         questions
-      WHERE question_id = #{id_to_find};]
-    Question.new(QuestionsDatabase.instance.execute(query)[0])
+      WHERE question_id = ?;]
+    Question.new(QuestionsDatabase.instance.execute(query, id_to_find)[0])
   end
 
   def Question.find_by_author_id(author_id)
     query = %Q[
       SELECT * FROM
         questions
-      WHERE author_id = '#{author_id}';]
-    QuestionsDatabase.instance.execute(query).map { |options| Question.new(options) }
+      WHERE author_id = ?;]
+    QuestionsDatabase.instance.execute(query, author_id).map { |options| Question.new(options) }
   end
 
   def create
-    QuestionsDatabase.instance.execute(<<-SQL, title, body, author_id)
+    query = %Q[
       INSERT INTO
         questions (title, body, author_id)
       VALUES
-        (?, ?, ?);
-        SQL
+        (?, ?, ?);]
+    QuestionsDatabase.instance.execute(query, title, body, author_id)
     @question_id = QuestionsDatabase.instance.last_insert_row_id
     return self
+  end
+
+  def save
+    query = %Q[
+      UPDATE questions
+      SET title = ?,
+          body = ?,
+          author_id = ?
+      WHERE question_id = ?]
+    QuestionsDatabase.instance.execute(query, @title, @body, @author_id, @question_id)
+    self
   end
 
   def author
@@ -158,24 +169,24 @@ class Reply
     query = %Q[
       SELECT * FROM
         replies
-      WHERE reply_id = #{id_to_find};]
-    Reply.new(QuestionsDatabase.instance.execute(query)[0])
+      WHERE reply_id = ?;]
+    Reply.new(QuestionsDatabase.instance.execute(query, id_to_find)[0])
   end
 
   def Reply.find_by_question_id(id_to_find)
     query = %Q[
       SELECT * FROM
         replies
-      WHERE question_id = #{id_to_find};]
-    QuestionsDatabase.instance.execute(query).map { |options| Reply.new(options) }
+      WHERE question_id = ?;]
+    QuestionsDatabase.instance.execute(query, id_to_find).map { |options| Reply.new(options) }
   end
 
   def Reply.find_by_author_id(id_to_find)
     query = %Q[
       SELECT * FROM
         replies
-      WHERE author_id = #{id_to_find};]
-    QuestionsDatabase.instance.execute(query).map { |options| Reply.new(options) }
+      WHERE author_id = ?;]
+    QuestionsDatabase.instance.execute(query, id_to_find).map { |options| Reply.new(options) }
   end
 
   def create
@@ -187,6 +198,18 @@ class Reply
     QuestionsDatabase.instance.execute(query, question_id, parent_id, body, author_id)
     @reply_id = QuestionsDatabase.instance.last_insert_row_id
     return self
+  end
+
+  def save
+    query = %Q[
+      UPDATE replies
+      SET question_id = ?,
+          parent_id = ?,
+          body = ?,
+          author_id = ?
+      WHERE user_id = ?]
+    QuestionsDatabase.instance.execute(query,@question_id, @parent_id, @body, @author_id, @user_id)
+    self
   end
 
   def author
@@ -205,8 +228,8 @@ class Reply
     query = %Q[
       SELECT * FROM
         replies
-      WHERE parent_id = #{@reply_id};]
-    QuestionsDatabase.instance.execute(query).map { |options| Reply.new(options) }
+      WHERE parent_id = ?;]
+    QuestionsDatabase.instance.execute(query, @reply_id).map { |options| Reply.new(options) }
   end
 
   def Question.most_followed(n)
@@ -220,16 +243,16 @@ class QuestionFollower
     query = %Q[
       SELECT user_id, first, last
       FROM users JOIN question_followers ON user_id = follower_id
-      WHERE question_id = #{id_to_find}; ]
-    QuestionsDatabase.instance.execute(query).map { |options| User.new(options) }
+      WHERE question_id = ?; ]
+    QuestionsDatabase.instance.execute(query, id_to_find).map { |options| User.new(options) }
   end
 
   def QuestionFollower.followed_questions_for_user_id(id_to_find)
     query = %Q[
       SELECT questions.question_id, title, body, author_id
       FROM questions JOIN question_followers ON questions.question_id = question_followers.question_id
-      WHERE follower_id = #{id_to_find}; ]
-    QuestionsDatabase.instance.execute(query).map { |options| Question.new(options) }
+      WHERE follower_id = ?; ]
+    QuestionsDatabase.instance.execute(query, id_to_find).map { |options| Question.new(options) }
   end
 
   def QuestionFollower.most_followed_questions(n)
@@ -251,17 +274,17 @@ class QuestionLike
     query = %Q[
       SELECT users.user_id, first, last
       FROM users JOIN question_likes ON users.user_id = question_likes.user_id
-      WHERE question_id = #{question_id}; ]
-    QuestionsDatabase.instance.execute(query).map { |options| User.new(options) }
+      WHERE question_id = ?; ]
+    QuestionsDatabase.instance.execute(query, question_id).map { |options| User.new(options) }
   end
 
   def QuestionLike.num_likes_for_question_id(question_id)
     query = %Q[
       SELECT COUNT(question_likes.question_id)
       FROM questions JOIN question_likes ON questions.question_id = question_likes.question_id
-      WHERE questions.question_id = #{question_id}
+      WHERE questions.question_id = ?
       GROUP BY question_likes.question_id;]
-    query_result = QuestionsDatabase.instance.execute(query)
+    query_result = QuestionsDatabase.instance.execute(query, question_id)
     unless query_result.empty?
       return query_result[0].values[0]
     else
@@ -273,8 +296,8 @@ class QuestionLike
     query = %Q[
       SELECT questions.question_id, title, body, author_id
       FROM questions JOIN question_likes ON questions.question_id = question_likes.question_id
-      WHERE user_id = #{user_id}; ]
-    QuestionsDatabase.instance.execute(query).map { |options| Question.new(options) }
+      WHERE user_id = ?; ]
+    QuestionsDatabase.instance.execute(query, user_id).map { |options| Question.new(options) }
   end
 
   def QuestionLike.most_liked_questions(n)
@@ -291,9 +314,9 @@ class QuestionLike
   def QuestionLike.average_karma_for_user_id(user_id)
     query = %Q[
     SELECT CAST(COUNT(question_likes.user_id) AS FLOAT)/COUNT(DISTINCT q.question_id)
-    FROM (SELECT question_id FROM questions WHERE author_id = #{user_id}) AS q
+    FROM (SELECT question_id FROM questions WHERE author_id = ?) AS q
       JOIN question_likes ON q.question_id = question_likes.question_id;]
-    QuestionsDatabase.instance.execute(query)[0].values[0]
+    QuestionsDatabase.instance.execute(query, user_id)[0].values[0]
   end
 
 end
