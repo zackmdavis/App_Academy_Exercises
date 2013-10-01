@@ -1,31 +1,32 @@
 CREATE TABLE users(
- user_id INT PRIMARY KEY,
+ user_id INTEGER PRIMARY KEY,
  first VARCHAR(20),
  last VARCHAR(20)
 );
 
 CREATE TABLE questions(
-  question_id INT PRIMARY KEY,
+  question_id INTEGER PRIMARY KEY,
 title VARCHAR(70),
 body TEXT,
-author_id INT
+author_id INTEGER
 );
 
 CREATE TABLE question_followers(
-  question_id INT,
-  follower_id INT
+  question_id INTEGER,
+  follower_id INTEGER
 );
 
 CREATE TABLE replies(
-  reply_id INT  PRIMARY KEY,
-  question_id INT,
-  parent_id INT,
-  author_id INT
+  reply_id INTEGER PRIMARY KEY,
+  question_id INTEGER,
+  parent_id INTEGER,
+  body TEXT,
+  author_id INTEGER
 );
 
 CREATE TABLE question_likes(
-  user_id INT,
-  question_id INT
+  user_id INTEGER,
+  question_id INTEGER
 );
 
 
@@ -48,4 +49,8 @@ INSERT INTO questions (question_id, title, body, author_id)
 VALUES (2, "Is John Brown's body a-mouldering in the grave?",
 "It's been a while", 2);
 
-
+-- demo replies
+INSERT INTO replies (reply_id, question_id, parent_id, body, author_id)
+VALUES (1, 1, NULL,
+"Yes, I used to wonder that like all the time, but then you-all shared its magic with me",
+3);
