@@ -47,13 +47,12 @@ class User
     QuestionsDatabase.instance.execute(query).map { |options| Question.new(options) }
   end
 
+  def followed_questions
+    QuestionFollower.followed_questions_for_user_id(@user_id)
+  end
+
   def authored_replies
-    query = %Q[
-      SELECT * FROM
-        replies
-      WHERE
-        author_id = #{@user_id}]
-    QuestionsDatabase.instance.execute(query).map { |options| Reply.new(options) }
+    Reply.find_by_user_id(@user_id)
   end
 
   def create
@@ -95,14 +94,6 @@ class Question
     QuestionsDatabase.instance.execute(query).map { |options| Question.new(options) }
   end
 
-  def author
-    User.find_by_id(author_id)
-  end
-
-  def replies
-
-  end
-
   def create
     QuestionsDatabase.instance.execute(<<-SQL, title, body, author_id)
       INSERT INTO
@@ -113,6 +104,19 @@ class Question
     @question_id = QuestionsDatabase.instance.last_insert_row_id
     return self
   end
+
+  def author
+    User.find_by_id(@author_id)
+  end
+
+  def replies
+    Reply.find_by_question_id(@question_id)
+  end
+
+  def followers
+    QuestionFollower.followers_for_question_id(@question_id)
+  end
+
 end
 
 class Reply
@@ -135,7 +139,20 @@ class Reply
     Reply.new(QuestionsDatabase.instance.execute(query)[0])
   end
 
-  def Reply.find_by_question_id
+  def Reply.find_by_question_id(id_to_find)
+    query = %Q[
+      SELECT * FROM
+        replies
+      WHERE question_id = #{id_to_find};]
+    QuestionsDatabase.instance.execute(query).map { |options| Reply.new(options) }
+  end
+
+  def Reply.find_by_author_id(id_to_find)
+    query = %Q[
+      SELECT * FROM
+        replies
+      WHERE author_id = #{id_to_find};]
+    QuestionsDatabase.instance.execute(query).map { |options| Reply.new(options) }
   end
 
   def create
@@ -145,9 +162,75 @@ class Reply
       VALUES
         (?, ?, ?, ?);]
     QuestionsDatabase.instance.execute(query, question_id, parent_id, body, author_id)
-    @user_id = QuestionsDatabase.instance.last_insert_row_id
+    @reply_id = QuestionsDatabase.instance.last_insert_row_id
     return self
+  end
+
+  def author
+    User.find_by_id(@author_id)
+  end
+
+  def question
+    Question.find_by_id(@question_id)
+  end
+
+  def parent_reply
+    Reply.find_by_id(@parent_id)
+  end
+
+  def child_replies
+    query = %Q[
+      SELECT * FROM
+        replies
+      WHERE parent_id = #{@reply_id};]
+    QuestionsDatabase.instance.execute(query).map { |options| Reply.new(options) }
+  end
+
+  def Question.most_followed(n)
+    QuestionFollower.most_followed_questions(n)
   end
 
 end
 
+class QuestionFollower
+  def QuestionFollower.followers_for_question_id(id_to_find)
+    query = %Q[
+      SELECT user_id
+      FROM users JOIN question_followers ON user_id = follower_id
+      WHERE question_id = #{id_to_find}; ]
+    QuestionsDatabase.instance.execute(query).map { |user_id_hash| User.find_by_id(user_id_hash.values[0]) }
+  end
+
+  def QuestionFollower.followed_questions_for_user_id(id_to_find)
+    query = %Q[
+      SELECT question_id
+      FROM users JOIN question_followers ON user_id = follower_id
+      WHERE follower_id = #{id_to_find}; ]
+    QuestionsDatabase.instance.execute(query).map { |q_id_hash| Question.find_by_id(q_id_hash.values[0]) }
+  end
+
+  def QuestionFollower.most_followed_questions(n)
+    query = %Q[
+      SELECT questions.question_id, title, body, author_id
+         FROM
+           questions JOIN question_followers
+             ON questions.question_id = question_followers.question_id
+         GROUP BY question_followers.question_id
+         ORDER BY COUNT(question_followers.question_id) DESC; ]
+    QuestionsDatabase.instance.execute(query)[0...n].map { |options| Question.new(options) }
+  end
+
+end
+
+class QuestionLike
+
+  def QuestionLike.likers_for_question_id(question_id)
+  end
+
+  def QuestionLike.num_likes_for_question_id(question_id)
+  end
+
+  def QuestionLike.liked_questions_for_user_id(user_id)
+  end
+
+end
