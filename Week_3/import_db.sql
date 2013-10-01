@@ -86,3 +86,6 @@ VALUES (3, 1);
 
 INSERT INTO question_likes (user_id, question_id)
 VALUES (2, 3);
+
+INSERT INTO question_likes (user_id, question_id)
+VALUES (3, 3);

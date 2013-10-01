@@ -38,6 +38,27 @@ class User
     QuestionsDatabase.instance.execute(query).map { |options| User.new(options) }
   end
 
+  def create
+    query = %Q[
+      INSERT INTO
+        users (first, last)
+      VALUES
+        (?, ?);]
+    QuestionsDatabase.instance.execute(query, first, last)
+    @user_id = QuestionsDatabase.instance.last_insert_row_id
+    self
+  end
+
+  def save
+    query = %Q[
+      UPDATE users
+      SET first = '#{@first}',
+          last = '#{@last}'
+      WHERE user_id = #{@user_id}]
+    QuestionsDatabase.instance.execute(query)
+    self
+  end
+
   def authored_questions
     query = %Q[
       SELECT * FROM
@@ -55,16 +76,10 @@ class User
     Reply.find_by_user_id(@user_id)
   end
 
-  def create
-    query = %Q[
-      INSERT INTO
-        users (first, last)
-      VALUES
-        (?, ?);]
-    QuestionsDatabase.instance.execute(query, first, last)
-    @user_id = QuestionsDatabase.instance.last_insert_row_id
-    return self
+  def liked_questions
+    QuestionLike.liked_questions_for_user_id(@user_id)
   end
+
 end
 
 class Question
@@ -115,6 +130,14 @@ class Question
 
   def followers
     QuestionFollower.followers_for_question_id(@question_id)
+  end
+
+  def likers
+    QuestionLike.likers_for_question_id(@question_id)
+  end
+
+  def num_likes
+    QuestionLike.num_likes_for_question_id(@question_id)
   end
 
 end
@@ -195,18 +218,18 @@ end
 class QuestionFollower
   def QuestionFollower.followers_for_question_id(id_to_find)
     query = %Q[
-      SELECT user_id
+      SELECT user_id, first, last
       FROM users JOIN question_followers ON user_id = follower_id
       WHERE question_id = #{id_to_find}; ]
-    QuestionsDatabase.instance.execute(query).map { |user_id_hash| User.find_by_id(user_id_hash.values[0]) }
+    QuestionsDatabase.instance.execute(query).map { |options| User.new(options) }
   end
 
   def QuestionFollower.followed_questions_for_user_id(id_to_find)
     query = %Q[
-      SELECT question_id
-      FROM users JOIN question_followers ON user_id = follower_id
+      SELECT questions.question_id, title, body, author_id
+      FROM questions JOIN question_followers ON questions.question_id = question_followers.question_id
       WHERE follower_id = #{id_to_find}; ]
-    QuestionsDatabase.instance.execute(query).map { |q_id_hash| Question.find_by_id(q_id_hash.values[0]) }
+    QuestionsDatabase.instance.execute(query).map { |options| Question.new(options) }
   end
 
   def QuestionFollower.most_followed_questions(n)
@@ -225,12 +248,52 @@ end
 class QuestionLike
 
   def QuestionLike.likers_for_question_id(question_id)
+    query = %Q[
+      SELECT users.user_id, first, last
+      FROM users JOIN question_likes ON users.user_id = question_likes.user_id
+      WHERE question_id = #{question_id}; ]
+    QuestionsDatabase.instance.execute(query).map { |options| User.new(options) }
   end
 
   def QuestionLike.num_likes_for_question_id(question_id)
+    query = %Q[
+      SELECT COUNT(question_likes.question_id)
+      FROM questions JOIN question_likes ON questions.question_id = question_likes.question_id
+      WHERE questions.question_id = #{question_id}
+      GROUP BY question_likes.question_id;]
+    query_result = QuestionsDatabase.instance.execute(query)
+    unless query_result.empty?
+      return query_result[0].values[0]
+    else
+      return 0
+    end
   end
 
   def QuestionLike.liked_questions_for_user_id(user_id)
+    query = %Q[
+      SELECT questions.question_id, title, body, author_id
+      FROM questions JOIN question_likes ON questions.question_id = question_likes.question_id
+      WHERE user_id = #{user_id}; ]
+    QuestionsDatabase.instance.execute(query).map { |options| Question.new(options) }
+  end
+
+  def QuestionLike.most_liked_questions(n)
+    query = %Q[
+      SELECT questions.question_id, title, body, author_id
+         FROM
+           questions JOIN question_likes
+             ON questions.question_id = question_likes.question_id
+         GROUP BY question_likes.question_id
+         ORDER BY COUNT(question_likes.question_id) DESC; ]
+    QuestionsDatabase.instance.execute(query)[0...n].map { |options| Question.new(options) }
+  end
+
+  def QuestionLike.average_karma_for_user_id(user_id)
+    query = %Q[
+    SELECT CAST(COUNT(question_likes.user_id) AS FLOAT)/COUNT(DISTINCT q.question_id)
+    FROM (SELECT question_id FROM questions WHERE author_id = #{user_id}) AS q
+      JOIN question_likes ON q.question_id = question_likes.question_id;]
+    QuestionsDatabase.instance.execute(query)[0].values[0]
   end
 
 end
