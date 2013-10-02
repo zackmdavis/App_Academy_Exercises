@@ -1,6 +1,7 @@
 require 'singleton'
 require 'sqlite3'
 
+
 class QuestionsDatabase < SQLite3::Database
   include Singleton
 
@@ -12,7 +13,28 @@ class QuestionsDatabase < SQLite3::Database
   end
 end
 
-class User
+class DataObject
+
+  def self.plural_downcase_class
+    self.to_s.downcase + 's'
+  end
+
+  def self.find_by_id(id_to_find)
+    query = %Q[
+      SELECT * FROM
+        #{self.plural_downcase_class}
+      WHERE id = ?;]
+    query_result = QuestionsDatabase.instance.execute(query, id_to_find)
+    unless query_result.empty?
+      return self.new(query_result[0])
+    else
+      return nil
+    end
+  end
+
+end
+
+class User < DataObject
 
   attr_accessor :id, :first, :last
 
@@ -20,19 +42,6 @@ class User
     @id = options["id"]
     @first = options["first"]
     @last = options["last"]
-  end
-
-  def self.find_by_id(id_to_find)
-    query = %Q[
-      SELECT * FROM
-        users
-      WHERE id = ?;]
-    query_result = QuestionsDatabase.instance.execute(query, id_to_find)
-    unless query_result.empty?
-      return User.new(query_result[0])
-    else
-      return nil
-    end
   end
 
   def self.find_by_name(first, last)
@@ -87,7 +96,7 @@ class User
 
 end
 
-class Question
+class Question < DataObject
 
   attr_accessor :id, :title, :body, :author_id
 
@@ -96,19 +105,6 @@ class Question
     @title = options["title"]
     @body = options["body"]
     @author_id = options["author_id"]
-  end
-
-  def Question.find_by_id(id_to_find)
-    query = %Q[
-      SELECT * FROM
-        questions
-      WHERE id = ?;]
-    query_result = QuestionsDatabase.instance.execute(query, id_to_find)
-    unless query_result.empty?
-      return Question.new(query_result[0])
-    else
-      return nil
-    end
   end
 
   def Question.find_by_author_id(author_id)
@@ -163,7 +159,7 @@ class Question
 
 end
 
-class Reply
+class Reply < DataObject
 
   attr_accessor :id, :question_id, :parent_id, :body, :author_id
 
@@ -175,17 +171,9 @@ class Reply
     @author_id = options["author_id"]
   end
 
-  def Reply.find_by_id(id_to_find)
-    query = %Q[
-      SELECT * FROM
-        replies
-      WHERE id = ?;]
-    query_result = QuestionsDatabase.instance.execute(query, id_to_find)
-    unless query_result.empty?
-      return Reply.new(query_result[0])
-    else
-      return nil
-    end
+  def self.plural_downcase_class
+    # irregular plural!
+    "replies"
   end
 
   def Reply.find_by_question_id(id_to_find)
