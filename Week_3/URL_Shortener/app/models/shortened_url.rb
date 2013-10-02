@@ -24,10 +24,23 @@ class ShortenedUrl < ActiveRecord::Base
   end
 
   def self.create_for_user_and_long_url!(user, long_url)
-    short_url_candidate = self.unique_random_code
+    short_url = self.unique_random_code
     options_hash = {:long_url => long_url, :submitter_id => user.id,
-      :short_url => short_url_candidate }
-    shortened_url_candidate = create(options_hash)
+      :short_url => short_url }
+    create(options_hash)
+    self.find_by_short_url(short_url)
+  end
+
+  def num_clicks
+    Visit.where(shortened_url_id: self.id).count
+  end
+
+  def num_uniques
+    Visit.where(shortened_url_id: self.id).group('visitor_id').count.count
+  end
+
+  def num_recent_clicks(minutes_ago = 5)
+    Visit.where(shortened_url_id: self.id, created_at: minutes_ago.minutes.ago .. Time.now).count
   end
 
 end
