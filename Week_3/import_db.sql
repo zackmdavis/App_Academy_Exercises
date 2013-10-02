@@ -69,10 +69,11 @@ INSERT INTO question_followers (user_id, question_id)
 VALUES (2, 1);
 
 INSERT INTO question_followers (user_id, question_id)
-VALUES (1, 2);
+VALUES (2, 2);
 
 INSERT INTO question_followers (user_id, question_id)
-VALUES (2, 2);
+VALUES (1, 2);
+
 
 -- demo likes
 INSERT INTO question_likes (user_id, question_id)
