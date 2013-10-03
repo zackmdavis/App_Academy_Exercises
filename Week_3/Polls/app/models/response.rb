@@ -12,8 +12,9 @@ class Response < ActiveRecord::Base
 
 
   def poll_author_cannot_answer_own_poll
-
-
+    if self.user_id == User.joins(:authored_polls => {:questions => :answer_choices}).where('answer_choices.id = ?', self.answer_choice_id)[0].id
+      errors[:base] << "You can't respond to your own poll!!"
+    end
   end
 
   def respondent_has_not_already_answered_question

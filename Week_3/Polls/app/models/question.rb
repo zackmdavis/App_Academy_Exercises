@@ -8,12 +8,11 @@ class Question < ActiveRecord::Base
   has_many :answer_choices, :primary_key => :id, :foreign_key => :question_id, :class_name => "AnswerChoice"
 
   def results
-    choices = answer_choices
-    # maybe rewrite late
-    counts = Hash.new(0)
+    choices = answer_choices.includes(:responses)
+    choices_counts = {}
     choices.each do |choice|
-      counts[choice.text] += choice.responses.count
+      choices_counts[choice.text] = choice.responses.length
     end
-    counts
+    choices_counts
   end
 end
