@@ -4,6 +4,8 @@ class ShortenedUrl < ActiveRecord::Base
   attr_accessible :long_url, :short_url, :submitter_id
   validates :short_url, :uniqueness => true, :presence => true
   validates :long_url, :submitter_id, :presence => true
+  validates :long_url, :length => { maximum: 12 }
+  validate :not_spamming
 
   has_many(
   :visits,
@@ -12,6 +14,14 @@ class ShortenedUrl < ActiveRecord::Base
   :primary_key => :id
   )
 
+  has_many(
+    :taggings,
+    :class_name => "Tagging",
+    :foreign_key => :tagged_url_id,
+    :primary_key => :id
+  )
+
+  has_many :tags, :through => :taggings, :source => :tags
   has_many :visitors, :through => :visits, :source => :user
 
   def self.unique_random_code
@@ -40,7 +50,25 @@ class ShortenedUrl < ActiveRecord::Base
   end
 
   def num_recent_clicks(minutes_ago = 5)
-    Visit.where(shortened_url_id: self.id, created_at: minutes_ago.minutes.ago .. Time.now).count
+    range = (minutes_ago.minutes.ago..Time.now)
+    Visit.where(shortened_url_id: self.id, created_at: range).count
+  end
+
+  def to_s
+    "#{long_url} shortened to #{short_url} by User ##{submitter_id}"
+  end
+
+  def inspect
+    "#{long_url} shortened to #{short_url} by User ##{submitter_id}\n"
+  end
+
+  private
+
+  def not_spamming
+    range = (5.minutes.ago..Time.now)
+    if ShortenedUrl.where(:submitter_id => submitter_id, :created_at => range).count >= 5
+      errors[:base] << "Too many shortened URLs in past 5 minutes"
+    end
   end
 
 end
