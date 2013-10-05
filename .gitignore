@@ -17,3 +17,9 @@ tmp
 .yardoc
 _yardoc
 doc/
+
+# SQLite databases
+*.db
+
+# Python
+*.pyc
