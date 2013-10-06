@@ -10,14 +10,20 @@ class SqlObject(MassObject):
     def __init__(self, db_connection, table_name, attributes = {}, id = None):
         super().__init__(attributes)
         self.table_name = table_name
-        self.attributes = attributes
         self.id = id
         self.db_connection = db_connection
         self.db_connection.row_factory = sqlite3.Row
         self.cursor = db_connection.cursor()
 
-    # TODO: update self.attributes and thus __repr__ when attributes
-    # change
+    @property
+    def attributes(self):
+        attr_dict = self.__dict__.copy()
+        del attr_dict['table_name']
+        del attr_dict['db_connection']
+        del attr_dict['cursor']
+        del attr_dict['id']
+        return attr_dict
+
     def __repr__(self):
         return "<" + str(self.table_name) + " " + str(self.attributes)[1:-1] + ">"
 
@@ -56,21 +62,18 @@ class SqlObject(MassObject):
     def create(self):
         attribute_names, attribute_values = zip(*self.attributes.items())
         query = "INSERT INTO {0} {1} VALUES {2};".format(self.table_name, attribute_names, SqlObject.question_marks(len(attribute_values)))
-        print(query)
         self.cursor.execute(query, attribute_values)
         self.db_connection.commit()
         self.id = self.cursor.lastrowid
+        return self.id
 
-    # apparently not working yet
     def update(self):
-        nonid_attributes = self.attributes.copy()
-        del nonid_attributes['id']
-        print(nonid_attributes)
-        set_string = ["{0} = ?".format(k) for k in nonid_attributes]
+        set_string = ["{0} = ?".format(k) for k in self.attributes]
         set_string = ", ".join(set_string)
         query = "UPDATE {0} SET {1} WHERE id = ?".format(self.table_name, set_string)
-        print(query)
-        self.cursor.execute(query, tuple(nonid_attributes.values())+(self.id,))
+        self.cursor.execute(query, tuple(self.attributes.values())+(self.id,))
+        self.db_connection.commit()
+
 
     def save(self):
         if self.id is None:
