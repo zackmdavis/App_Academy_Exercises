@@ -40,5 +40,12 @@ class TestSqlObject(unittest.TestCase):
         retrieved_sql_object = SqlObject.find(self.cxn, "test_items", self.our_sql_object.id)
         self.assertEqual(retrieved_sql_object.attribute2, self.our_sql_object.attribute2)
 
+    def testWhere(self):
+        sql_object_where = SqlObject(self.cxn, "test_items", {'attribute1': 45, 'attribute2': "coffee"})
+        sql_object_where.save()
+        retrieved_objects_where = SqlObject.where(self.cxn, "test_items", {'attribute2': "coffee"})
+        self.assertEqual(len(retrieved_objects_where), 1)
+        self.assertEqual(retrieved_objects_where[0].id, sql_object_where.id) 
+
 if __name__ == '__main__':
     unittest.main()

@@ -25,21 +25,14 @@ class SqlObject(MassObject):
         return attr_dict
 
     def __repr__(self):
-        return "<" + str(self.table_name) + " " + str(self.attributes)[1:-1] + ">"
-
-    @staticmethod
-    def dict_from_row(row):
-        row_dict = {}
-        for key in row.keys():
-            row_dict[key] = row[key]
-        return row_dict
+        return "<{0} {1} {2}>".format(self.table_name, self.id, str(self.attributes)[1:-1])
 
     @classmethod
     def all(cls, db_connection, table_name):
         query = "SELECT * FROM {0};".format(table_name)
         results = db_connection.execute(query).fetchall()
         result_dicts = [cls.dict_from_row(row) for row in results]
-        return [SqlObject(db_connection, table_name, rd, id) for rd in result_dicts]
+        return [SqlObject(db_connection, table_name, rd, rd["id"]) for rd in result_dicts]
 
     @classmethod
     def find(cls, db_connection, table_name, id):
@@ -47,6 +40,15 @@ class SqlObject(MassObject):
         result = db_connection.execute(query, (id,)).fetchone()
         result_dict = cls.dict_from_row(result)
         return SqlObject(db_connection, table_name, result_dict, id)
+
+    @classmethod
+    def where(cls, db_connection, table_name, search_parameters):
+        where_string = ["{0} = ?".format(k) for k in search_parameters]
+        where_string = ", ".join(where_string)
+        query = "SELECT * FROM {0} WHERE {1}".format(table_name, where_string)
+        results = db_connection.execute(query, tuple(search_parameters.values())).fetchall()
+        result_dicts = [cls.dict_from_row(row) for row in results]
+        return [SqlObject(db_connection, table_name, rd, rd["id"]) for rd in result_dicts]
 
     @staticmethod
     def question_marks(n):
@@ -58,6 +60,13 @@ class SqlObject(MassObject):
                 marks_string += "?, "
             marks_string += "?)"
             return marks_string
+
+    @staticmethod
+    def dict_from_row(row):
+        row_dict = {}
+        for key in row.keys():
+            row_dict[key] = row[key]
+        return row_dict
 
     def create(self):
         attribute_names, attribute_values = zip(*self.attributes.items())
@@ -73,7 +82,6 @@ class SqlObject(MassObject):
         query = "UPDATE {0} SET {1} WHERE id = ?".format(self.table_name, set_string)
         self.cursor.execute(query, tuple(self.attributes.values())+(self.id,))
         self.db_connection.commit()
-
 
     def save(self):
         if self.id is None:
