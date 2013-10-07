@@ -45,7 +45,7 @@ describe "associatable" do
   end
 
   describe "#has_many" do
-    it "association as method" do
+    it "adds association as method" do
       human.methods.should include(:cats)
     end
 
