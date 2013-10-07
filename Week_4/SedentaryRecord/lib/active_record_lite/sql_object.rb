@@ -4,6 +4,10 @@ require_relative './mass_object'
 require_relative './searchable'
 
 class SQLObject < MassObject
+
+  extend Searchable
+  extend Associatable
+
   def self.set_table_name(table_name)
     @table_name = table_name
   end
@@ -15,7 +19,7 @@ class SQLObject < MassObject
   def self.all
     query = "SELECT * FROM #{self.table_name};"
     results = DBConnection.execute(query)
-    results.map { |row| new(row) }
+    self.parse_all(results)
   end
 
   def self.find(id)

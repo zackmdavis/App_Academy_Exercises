@@ -11,6 +11,7 @@ class MassObject
   end
 
   def self.parse_all(results)
+    results.map{ |row| new(row) }
   end
 
   def initialize(params = {})
