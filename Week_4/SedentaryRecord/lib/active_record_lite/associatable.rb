@@ -80,5 +80,9 @@ module Associatable
   end
 
   def has_one_through(name, assoc1, assoc2)
+    self.define_method(name) do
+      self.send(assoc1.to_sym).send(assoc2.to_sym)
+    end
   end
+
 end

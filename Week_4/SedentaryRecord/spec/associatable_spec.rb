@@ -53,4 +53,14 @@ describe "associatable" do
       human.cats.first.should be_instance_of(Cat)
     end
   end
+
+  describe "#has_one_through" do
+    it "adds association as method" do
+      cat.methods.should include(:house)
+    end
+
+    it "adds an association that returns correct type" do
+      cat.house.should be_instance_of(House)
+    end
+  end
 end
