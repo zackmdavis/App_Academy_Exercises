@@ -3,70 +3,89 @@ require 'nokogiri'
 require 'rest-client'
 require 'addressable/uri'
 require './api_key'
-include ApiKey
 
-def ice_cream
-# puts "What is your current address??"
-# address_input = gets.chomp
-address_input = "1061 Market St, San Francisco, CA"
-location_url = Addressable::URI.new(
-  :scheme => "http",
-  :host => "maps.googleapis.com",
-  :path => "maps/api/geocode/json",
-  :query_values => {:address => address_input, :sensor => "false"}).to_s
-location_json = RestClient.get(location_url)
-location_hash = JSON.parse(location_json)
-location_coordinates = location_hash["results"][0]["geometry"]["location"]
+class IceCreamFinder
 
-lat = location_coordinates["lat"].to_s
-lng = location_coordinates["lng"].to_s
+  include ApiKey
 
-search_url = Addressable::URI.new(
-:scheme => "https",
-:host => "maps.googleapis.com",
-:path => "maps/api/place/nearbysearch/json",
-:query_values => {:key => api_key, :location => "#{lat},#{lng}",
-                  :radius => "1500", :keyword => "ice cream", :sensor => "false"}).to_s
+  def find_lat_long_from_address
+    address_input = "1061 Market St, San Francisco, CA"
+    location_url = Addressable::URI.new(
+      :scheme => "http",
+      :host => "maps.googleapis.com",
+      :path => "maps/api/geocode/json",
+      :query_values => {:address => address_input, :sensor => "false"}).to_s
+    location_json = RestClient.get(location_url)
+    location_hash = JSON.parse(location_json)
+    location_coordinates = location_hash["results"][0]["geometry"]["location"]
 
-search_json = RestClient.get(search_url)
-search_hash = JSON.parse(search_json)
+    lat = location_coordinates["lat"].to_s
+    lng = location_coordinates["lng"].to_s
+    lat_lng = "#{lat},#{lng}"
+  end
 
-places = search_hash["results"][0..2]
-places.map! { |place| [place["name"], place["vicinity"]] }
+  def find_nearby_places(coordinates)
+    search_url = Addressable::URI.new(
+    :scheme => "https",
+    :host => "maps.googleapis.com",
+    :path => "maps/api/place/nearbysearch/json",
+    :query_values => {:key => api_key, :location => coordinates,
+                      :radius => "1500", :keyword => "ice cream", :sensor => "false"}).to_s
 
-address = places[0][1]
+    search_json = RestClient.get(search_url)
+    search_hash = JSON.parse(search_json)
 
-directions_url = Addressable::URI.new(
-:scheme => "https",
-:host => "maps.googleapis.com",
-:path => "maps/api/directions/json",
-:query_values => {:origin => "#{lat},#{lng}", :destination => address, :sensor => "false"}).to_s
+    places = search_hash["results"][0..2]
+    places.map! { |place| [place["name"], place["vicinity"], coordinates] }
+  end
 
-directions_json = RestClient.get(directions_url)
-directions_hash = JSON.parse(directions_json)
-directions_hash
+  def get_directions_hash_for_place(place)
+    directions_url = Addressable::URI.new(
+    :scheme => "https",
+    :host => "maps.googleapis.com",
+    :path => "maps/api/directions/json",
+    :query_values => {:origin => place[2], :destination => place[1], :sensor => "false"}).to_s
 
-def steps_from_directions_hash(directions)
-  readable_directions = ""
-  route = directions["routes"][0]
-  legs = route["legs"]
-  legs.each do |leg|
-    steps = leg["steps"]
-    steps.each do |step|
-      readable_directions += step["html_instructions"]+"\n"
+    directions_json = RestClient.get(directions_url)
+    directions_hash = JSON.parse(directions_json)
+    directions_hash
+  end
+
+  def steps_from_directions_hash(directions)
+    readable_directions = ""
+    route = directions["routes"][0]
+    legs = route["legs"]
+    legs.each do |leg|
+      steps = leg["steps"]
+      steps.each do |step|
+        readable_directions += step["html_instructions"]+"\n"
+      end
+    end
+    plain_directions = Nokogiri::HTML(readable_directions).text
+    plain_directions.gsub("Destination will be", "\nDestination will be")+"\n"
+  end
+
+  def display(place, plain_directions)
+    puts place[0]
+    puts place[1], "\n"
+    puts "Directions:"
+    puts plain_directions
+  end
+
+  def run
+    coordinates = find_lat_long_from_address
+    places = find_nearby_places(coordinates)
+    puts "Nearby ice-cream follows!---\n"
+    places.each do |place|
+      directions = get_directions_hash_for_place(place)
+      steps = steps_from_directions_hash(directions)
+      display(place, steps)
+      puts "----------"
     end
   end
-  plain_directions = Nokogiri::HTML(readable_directions).text
-  plain_directions = plain_directions.gsub("Destination will be", "\nDestination will be")+"\n"
-end
-
-puts "The nearest ice-cream parlor is"
-puts places[0][0]
-puts address
-puts "Directions follow---"
-puts
-print steps_from_directions_hash(directions_hash)
 
 end
 
-ice_cream
+if __FILE__ == $PROGRAM_NAME
+  IceCreamFinder.new.run
+end
