@@ -8,6 +8,11 @@ class User < ActiveRecord::Base
 
   has_many :statuses, :class_name => "Status", :primary_key => :twitter_user_id, :foreign_key => :twitter_user_id
 
+  has_many :inbound_follows, :class_name => "Follow", :primary_key => :twitter_user_id, :foreign_key => :followee_id
+  has_many :outbound_follows, :class_name => "Follow", :primary_key => :twitter_user_id, :foreign_key => :follower_id
+  has_many :followers, :through => :inbound_follows
+  has_many :followed_users, :through => :outbound_follows
+
   def self.fetch_by_screen_name(screen_name)
     access_token = YAML::load(File.open("lib/saved_token.yaml", 'r'))
     user_raw_json = access_token.get("https://api.twitter.com/1.1/users/lookup.json?screen_name=#{screen_name}").body

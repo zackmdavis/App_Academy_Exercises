@@ -13,6 +13,7 @@ class Status < ActiveRecord::Base
     access_token = YAML::load(File.open("lib/saved_token.yaml", 'r'))
     if !user.statuses.empty?
       most_recent_id = self.get_most_recent_status(user).twitter_status_id
+      p most_recent_id
       url = "https://api.twitter.com/1.1/statuses/user_timeline.json?user_id=#{user.twitter_user_id}&since_id=#{most_recent_id}"
       statuses_raw_json = access_token.get(url).body
       status_hashes = JSON.parse(statuses_raw_json)
@@ -32,6 +33,6 @@ class Status < ActiveRecord::Base
   end
 
   def self.get_most_recent_status(user)
-    user.statuses.max_by { |status| status.twitter_status_id }
+    user.statuses.all.max_by { |status| status.twitter_status_id }
   end
 end
