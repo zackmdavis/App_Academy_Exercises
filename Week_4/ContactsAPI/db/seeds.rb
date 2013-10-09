@@ -14,6 +14,6 @@ contact1 = Contact.create!(:name => "Carly Fiona", :email => "c@hp.com", :user_i
 contact2 = Contact.create!(:name => "Bill DiMaggio", :email => "b@b.org", :user_id => 2)
 contact3 = Contact.create!(:name => "Tara Strong", :email => "t@dsijogh.com", :user_id => 1)
 
-share1 = ContactShare.create!(:user_id => 3, :contact_id => 1)
+share1 = ContactShare.create!(:user_id => 1, :contact_id => 2)
 share2 = ContactShare.create!(:user_id =>2, :contact_id => 3)
 

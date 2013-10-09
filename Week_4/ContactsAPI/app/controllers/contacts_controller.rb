@@ -1,8 +1,10 @@
 class ContactsController < ApplicationController
 
   def index
-    @contacts = Contact.all
-    render :json => @contacts
+    @user = User.find(params[:user_id])
+    @contacts = @user.contacts
+    @contact_shares = @user.contact_shares.map { |share| Contact.find(share.contact_id) }
+    render :json => @contacts + @contact_shares
   end
 
   def show
@@ -17,21 +19,21 @@ class ContactsController < ApplicationController
   end
 
   def create
-    contact = Contact.new(params[:contact])
-    if contact.save
-      render :json => contact
+    @contact = Contact.new(params[:contact])
+    if @contact.save
+      render :json => @contact
     else
-      render :json => contact.errors
+      render :json => @contact.errors
     end
   end
 
   def update
-    contact = Contact.find(params[:id])
-    contact.assign_attributes(params[:contact])
-    if contact.save
-      render :json => contact
+    @contact = Contact.find(params[:id])
+    @contact.assign_attributes(params[:contact])
+    if @contact.save
+      render :json => @contact
     else
-      render :json => contact.errors
+      render :json => @contact.errors
     end
   end
 
