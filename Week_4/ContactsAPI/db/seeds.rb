@@ -9,3 +9,11 @@
 user1 = User.create!(:name => "David", :email => "david@david.com")
 user2 = User.create!(:name => "Zack", :email => "zack@zack.com")
 user3 = User.create!(:name => "John", :email => "john@john.com")
+
+contact1 = Contact.create!(:name => "Carly Fiona", :email => "c@hp.com", :user_id => 1)
+contact2 = Contact.create!(:name => "Bill DiMaggio", :email => "b@b.org", :user_id => 2)
+contact3 = Contact.create!(:name => "Tara Strong", :email => "t@dsijogh.com", :user_id => 1)
+
+share1 = ContactShare.create!(:user_id => 3, :contact_id => 1)
+share2 = ContactShare.create!(:user_id =>2, :contact_id => 3)
+

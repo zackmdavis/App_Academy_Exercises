@@ -1,6 +1,7 @@
 ContactsAPI::Application.routes.draw do
 
-  resources :users
+  resources :users, exclude: [:new, :edit]
+  resources :contacts, exclude: [:new, :edit]
 
   # The priority is based upon order of creation:
   # first created -> highest priority.

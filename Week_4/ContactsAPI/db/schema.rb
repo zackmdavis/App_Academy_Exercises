@@ -11,13 +11,36 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20131009182537) do
+ActiveRecord::Schema.define(:version => 20131009203947) do
 
-  create_table "users", :force => true do |t|
-    t.string   "name"
-    t.string   "email"
+  create_table "contact_shares", :force => true do |t|
+    t.integer  "contact_id", :null => false
+    t.integer  "user_id",    :null => false
     t.datetime "created_at", :null => false
     t.datetime "updated_at", :null => false
   end
+
+  add_index "contact_shares", ["contact_id"], :name => "index_contact_shares_on_contact_id"
+  add_index "contact_shares", ["user_id"], :name => "index_contact_shares_on_user_id"
+
+  create_table "contacts", :force => true do |t|
+    t.string   "name",       :null => false
+    t.string   "email",      :null => false
+    t.integer  "user_id",    :null => false
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
+  add_index "contacts", ["email"], :name => "index_contacts_on_email"
+  add_index "contacts", ["user_id"], :name => "index_contacts_on_user_id"
+
+  create_table "users", :force => true do |t|
+    t.string   "name",       :null => false
+    t.string   "email",      :null => false
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
+  add_index "users", ["email"], :name => "index_users_on_email"
 
 end
