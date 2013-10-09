@@ -1,7 +1,9 @@
 ContactsAPI::Application.routes.draw do
 
   resources :users, only: [] do
-    resources :contacts, only: [:index]
+    resources :contacts, only: [:index] do
+      get 'favorites', :on => :collection
+    end
   end
 
   resources :contacts, except: [:new, :edit, :index]

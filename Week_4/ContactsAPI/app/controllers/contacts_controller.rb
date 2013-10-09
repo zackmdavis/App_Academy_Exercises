@@ -39,4 +39,9 @@ class ContactsController < ApplicationController
     end
   end
 
+  def favorites
+    @contacts = Contact.contacts_for_user_id(params[:user_id]).where(:favorite => true)
+    render :json => @contacts
+  end
+
 end
