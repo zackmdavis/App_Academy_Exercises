@@ -1,10 +1,12 @@
 class ContactsController < ApplicationController
 
   def index
-    @user = User.find(params[:user_id])
-    @contacts = @user.contacts
-    @contact_shares = @user.contact_shares.map { |share| Contact.find(share.contact_id) }
-    render :json => @contacts + @contact_shares
+    # old version---
+    # @user = User.find(params[:user_id])
+    # @contacts = @user.contacts
+    # @contact_shares = @user.contact_shares.map { |share| Contact.find(share.contact_id) }
+    @contacts = Contact.contacts_for_user_id(params[:user_id])
+    render :json => @contacts
   end
 
   def show
