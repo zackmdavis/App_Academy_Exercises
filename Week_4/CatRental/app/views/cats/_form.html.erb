@@ -1,0 +1,29 @@
+
+	<% if action == :edit %>
+	<form action= "<%= cat_url(cat) %>" method="post">
+	<input type="hidden" name="_method" value="PUT">
+	<% else %>
+	<form action= "<%= cats_url %>" method="post">
+	<% end %>
+	Name: <input type="text" name="cat[name]" value="<%= cat.name %>" ><br>
+	Age: <input type="text" name="cat[age]" value="<%= cat.age %>"><br>
+	Birth date: <input type="text" name="cat[birth_date]" value="<%= cat.birth_date %>"><br>
+	Color: <select name="cat[color]" value="<%= cat.color %>">
+		<option value="black">black</option>
+		<option value="brown">brown</option>
+		<option value="white">white</option>
+		<option value="gray">gray</option>
+		<option value="calico">calico</option>
+		<option value="other">other</option>
+	</select><br>
+
+<% if cat.sex == 'F' %>
+	Sex: F <input type="radio" name="cat[sex]" value="F" checked="checked">
+	M <input type="radio" name="cat[sex]" value="M">
+<% else %>
+	Sex: F <input type="radio" name="cat[sex]" value="F" >
+	M <input type="radio" name="cat[sex]" value="M" checked="checked">
+<% end %>
+	<input type="submit" value=<%= button_text %>>
+</form>
+

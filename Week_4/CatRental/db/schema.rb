@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20131010181209) do
+ActiveRecord::Schema.define(:version => 20131010211620) do
 
   create_table "cats", :force => true do |t|
     t.string   "name"
@@ -23,5 +23,16 @@ ActiveRecord::Schema.define(:version => 20131010181209) do
     t.datetime "created_at", :null => false
     t.datetime "updated_at", :null => false
   end
+
+  create_table "rental_requests", :force => true do |t|
+    t.integer  "cat_id"
+    t.date     "start_date"
+    t.date     "end_date"
+    t.string   "status",     :default => "PENDING"
+    t.datetime "created_at",                        :null => false
+    t.datetime "updated_at",                        :null => false
+  end
+
+  add_index "rental_requests", ["cat_id"], :name => "index_rental_requests_on_cat_id"
 
 end
