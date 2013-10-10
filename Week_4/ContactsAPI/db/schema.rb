@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20131009225844) do
+ActiveRecord::Schema.define(:version => 20131009235305) do
 
   create_table "contact_shares", :force => true do |t|
     t.integer  "contact_id", :null => false
@@ -34,6 +34,20 @@ ActiveRecord::Schema.define(:version => 20131009225844) do
 
   add_index "contacts", ["email"], :name => "index_contacts_on_email"
   add_index "contacts", ["user_id"], :name => "index_contacts_on_user_id"
+
+  create_table "group_memberships", :force => true do |t|
+    t.integer  "group_id"
+    t.integer  "contact_id"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
+  create_table "groups", :force => true do |t|
+    t.integer  "user_id"
+    t.string   "name"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
 
   create_table "users", :force => true do |t|
     t.string   "name",       :null => false

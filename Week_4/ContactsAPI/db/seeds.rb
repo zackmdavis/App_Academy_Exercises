@@ -10,10 +10,15 @@ user1 = User.create!(:name => "David", :email => "david@david.com")
 user2 = User.create!(:name => "Zack", :email => "zack@zack.com")
 user3 = User.create!(:name => "John", :email => "john@john.com")
 
-contact1 = Contact.create!(:name => "Carly Fiona", :email => "c@hp.com", :user_id => 1)
+contact1 = Contact.create!(:name => "Carly Fiona", :email => "c@hp.com", :user_id => 1, :favorite => true)
 contact2 = Contact.create!(:name => "Bill DiMaggio", :email => "b@b.org", :user_id => 2)
 contact3 = Contact.create!(:name => "Tara Strong", :email => "t@dsijogh.com", :user_id => 1)
 
 share1 = ContactShare.create!(:user_id => 1, :contact_id => 2)
 share2 = ContactShare.create!(:user_id =>2, :contact_id => 3)
 
+group1 = Group.create!(:name => "Friends", :user_id => 1)
+group2 = Group.create!(:name => "Colleagues", :user_id => 2)
+
+group_membership1 = GroupMembership.create!(:group_id => 1, :contact_id => 1)
+group_membership1 = GroupMembership.create!(:group_id => 2, :contact_id => 2)
