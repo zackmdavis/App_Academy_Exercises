@@ -1,0 +1,9 @@
+<% img_filename = "#{@cat.color}.jpg" %>
+<img src="<%= asset_path( img_filename ) %>">
+<table>
+	<% @rental_request.attributes.each do |attribute, value| %>
+		<tr>
+			<td><b><%= attribute %>:</b></td><td><%= value %></td>
+		</tr>
+	<% end %>
+</table>

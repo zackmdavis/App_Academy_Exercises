@@ -13,7 +13,6 @@ class CatsController < ApplicationController
   def create
     @cat = Cat.new(params[:cat])
     if @cat.save
-      #render cats_url(@cat.id)
       render :show
     else
       render :json => "ERROR CREATING CAT"
@@ -41,7 +40,8 @@ class CatsController < ApplicationController
   end
 
   def destroy
-
+    Cat.find(params[:id]).destroy
+    render :index
   end
 
 end

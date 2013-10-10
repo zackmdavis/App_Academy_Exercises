@@ -1,10 +1,9 @@
-
-	<% if action == :edit %>
+<% if action == :edit %>
 	<form action= "<%= cat_url(cat) %>" method="post">
 	<input type="hidden" name="_method" value="PUT">
-	<% else %>
+<% else %>
 	<form action= "<%= cats_url %>" method="post">
-	<% end %>
+<% end %>
 	Name: <input type="text" name="cat[name]" value="<%= cat.name %>" ><br>
 	Age: <input type="text" name="cat[age]" value="<%= cat.age %>"><br>
 	Birth date: <input type="text" name="cat[birth_date]" value="<%= cat.birth_date %>"><br>

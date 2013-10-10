@@ -1,0 +1,58 @@
+	<% if action == :edit %>
+	<form action= "<%= rental_request_url(rental_request) %>" method="post">
+	<input type="hidden" name="_method" value="PUT">
+	<% else %>
+	<form action= "<%= rental_requests_url %>" method="post">
+	<% end %>
+	Cat ID: <select name="rental_request[cat_id]" value="<%= rental_request.cat_id %>">
+		<% cats.each do |cat| %>
+		<option value="<%= cat.id %>"><%= cat.name %></option>
+		<% end %>
+	</select>
+		<br>
+	Start Date:
+	<br>
+	Month: <select name="rental_request[start_date][month]" value="<%= rental_request.start_date.mon %>">
+		<option value="January">January</option>
+		<option value="February">February</option>
+		<option value="March">March</option>
+		<option value="April">April</option>
+		<option value="May">May</option>
+		<option value="June">June</option>
+		<option value="July">July</option>
+		<option value="August">August</option>
+		<option value="September">September</option>
+		<option value="October">October</option>
+		<option value="November">November</option>
+		<option value="December">December</option>
+	</select>
+	Day: <input type="text" name = "rental_request[start_date][day]" value = "<%= rental_request.start_date.day%>" >
+	Year: <select name="rental_request[start_date][year]" value="<%= rental_request.start_date.year %>">
+		<% (1990..2020).each do |year|%>
+		<option value="<%= year %>"><%= year %></option>
+		<% end %>
+	</select>
+	<br>
+	End Date: <br>
+	Month: <select name="rental_request[end_date][month]" value="<%= rental_request.end_date.mon %>">
+		<option value="January">January</option>
+		<option value="February">February</option>
+		<option value="March">March</option>
+		<option value="April">April</option>
+		<option value="May">May</option>
+		<option value="June">June</option>
+		<option value="July">July</option>
+		<option value="August">August</option>
+		<option value="September">September</option>
+		<option value="October">October</option>
+		<option value="November">November</option>
+		<option value="December">December</option>
+	</select>
+	Day: <input type="text" name = "rental_request[end_date][day]" value = "<%= rental_request.end_date.day%>" >
+	Year: <select name="rental_request[end_date][year]" value="<%= rental_request.end_date.year %>">
+		<% (1990..2020).each do |year|%>
+		<option value="<%= year %>"><%= year %></option>
+		<% end %>
+	</select>
+		<input type="submit" value="Submit">
+</form>
