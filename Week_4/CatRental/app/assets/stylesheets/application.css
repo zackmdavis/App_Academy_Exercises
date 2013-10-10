@@ -11,3 +11,13 @@
  *= require_self
  *= require_tree .
  */
+
+body
+{
+background-color:#CCCCCC;
+}
+
+h1 {
+  font-family: 'Tangerine', serif;
+	font-size: 70px;
+}
