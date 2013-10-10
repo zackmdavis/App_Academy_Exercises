@@ -1,0 +1,16 @@
+<form action="/cats" method= "post">
+	Name: <input type="text" name="cat[name]"><br>
+	Age: <input type="text" name="cat[age]"><br>
+	Birth date: <input type="text" name="cat[birth_date]"><br>
+	<!-- Color: <input type="select" name="cat[color]"> -->
+	Color: <select name="cat[color]">
+		<option value="black">black</option>
+		<option value="brown">brown</option>
+		<option value="white">white</option>
+		<option value="gray">gray</option>
+		<option value="calico">calico</option>
+		<option value="other">other</option>
+	</select>
+	Sex: F <input type="radio" name="cat[sex]" value="F"> M <input type="radio" name="cat[sex]" value="M">
+	<input type="submit" value="Create cat!">
+</form>
