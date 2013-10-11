@@ -4,6 +4,10 @@
 <% else %>
 	<form action= "<%= cats_url %>" method="post">
 <% end %>
+	<input type="hidden"
+				 name="authenticity_token"
+				 value="<%= form_authenticity_token %>">
+
 	Name: <input type="text" name="cat[name]" value="<%= cat.name %>" ><br>
 	Age: <input type="text" name="cat[age]" value="<%= cat.age %>"><br>
 	Birth date: <input type="text" name="cat[birth_date]" value="<%= cat.birth_date %>"><br>
