@@ -7,3 +7,17 @@
 		</tr>
 	<% end %>
 </table>
+<br><br>
+<b>Requests:</b>
+<br><br>
+<% @cat.rental_requests.each_with_index do |request, index| %>
+	request #<%= index + 1 %>
+	<table>
+		<% request.attributes.each do |attribute, value| %>
+			<tr>
+				<td><b><%= attribute %>:</b></td><td><%= value %></td>
+			</tr>
+		<% end %>
+	</table>
+	<br>
+<% end %>
