@@ -5,7 +5,6 @@ class SessionsController < ApplicationController
   end
 
   def create
-    p "params hash is", params
     user = User.find_by_credentials(params["user"]["username"],
                                     params["user"]["password"])
 
@@ -22,8 +21,6 @@ class SessionsController < ApplicationController
   end
 
   def destroy
-    self.current_user.reset_session_token!
-
     session[:session_token] = nil
 
     flash[:messages] ||= []
