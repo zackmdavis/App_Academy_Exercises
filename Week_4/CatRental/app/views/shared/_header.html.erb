@@ -1,23 +1,24 @@
-<h1>Cat Rental ...!</h1>
+<h1><a href="/">Cat Rental ...!</a></h1>
 
 <% flash.each do |type, messages| %>
 	<p>
-		<%= type.capitalize %>:
-		<p>
-			<% messages.each do |message| %>
-				<%= message %>
-			<% end %>
-		</p>
+		<div class="flash <%= type %>">
+			<p>
+				<% messages.each do |message| %>
+					<%= message %>
+					<% end %>
+			</p>
+		</div>
 	</p>
 <% end %>
 
 <% user = current_user %>
 <% if user.nil? %>
-	<%= button_to "Login", login_url, method: :get %>
-	<%= button_to "Signup", new_user_url, method: :get %>
+	<span class="buttonlink"><%= link_to "Log in", login_url, method: :get %></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	<span class="buttonlink"><%= link_to "Sign up", new_user_url, method: :get %></span>
 <% else %>
-	<h3>logged in as <%= user.username %></h3>
-	<%= button_to "Logout", logout_url, :method => :delete %>
+	<p>logged in as <b><%= user.username %></b></p>
+	<span class="buttonlink"><%= link_to "Log out", logout_url, :method => :delete %></span>
 <% end %>
-
+<hr>
 <br><br>

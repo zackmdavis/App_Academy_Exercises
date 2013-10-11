@@ -15,7 +15,7 @@ class SessionsController < ApplicationController
       redirect_to cats_url
     else
       flash[:errors] ||= []
-      flash[:errors] << "Cannot create session!"
+      flash[:errors] << "Incorrect username or password!"
 
       render :new
     end
@@ -26,8 +26,8 @@ class SessionsController < ApplicationController
 
     session[:session_token] = nil
 
-    flash[:alert] ||= []
-    flash[:alert] << "Successfully logged out!"
+    flash[:messages] ||= []
+    flash[:messages] << "You have been successfully logged out!"
     redirect_to cats_url
   end
 end

@@ -12,9 +12,8 @@
  *= require_tree .
  */
 
-body
-{
-background-color:#CCCCCC;
+body {
+	background-color:#CCCCCC;
 }
 
 h1 {
@@ -22,3 +21,36 @@ h1 {
 	font-size: 70px;
 	background-color:#EEFFCC;
 }
+
+h1 a{
+	color:#000000;
+	text-decoration:none;
+}
+
+.flash {
+	font-style:italic;
+	font-weight:bold;
+}
+
+.flash.errors {
+	color:#AA0000;
+	background-color:#FFCCDD;
+}
+
+.flash.messages {
+	color: #007030;
+	background-color: #CEEECC;
+}
+
+.buttonlink {
+	font-size: 20px;
+	background-color: #DDDDFF;
+}
+
+.buttonlink a{
+	color:#000000;
+	text-decoration:none;
+	font-weight:bold;
+}
+
+
