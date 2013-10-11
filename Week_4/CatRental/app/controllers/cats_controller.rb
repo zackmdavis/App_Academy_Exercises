@@ -1,4 +1,7 @@
 class CatsController < ApplicationController
+  include CatsHelper
+
+  before_filter :current_user_owns_cat!, :only => [:edit, :update]
 
   def index
     @cats = Cat.all

@@ -4,7 +4,11 @@
 	<% else %>
 	<form action= "<%= rental_requests_url %>" method="post">
 	<% end %>
-	Cat ID: <select name="rental_request[cat_id]" value="<%= rental_request.cat_id %>">
+	<input type="hidden"
+				 name="authenticity_token"
+				 value="<%= form_authenticity_token %>">
+
+	Cat: <select name="rental_request[cat_id]" value="<%= rental_request.cat_id %>">
 		<% cats.each do |cat| %>
 		<option value="<%= cat.id %>"><%= cat.name %></option>
 		<% end %>

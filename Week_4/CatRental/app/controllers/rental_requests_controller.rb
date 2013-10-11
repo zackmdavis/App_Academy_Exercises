@@ -1,6 +1,8 @@
 class RentalRequestsController < ApplicationController
-
   include RentalRequestsHelper
+  include CatsHelper
+
+  before_filter :current_user_owns_cat!, :only => [:approve, :deny]
 
   def index
     @cat = Cat.find(params[:cat_id])

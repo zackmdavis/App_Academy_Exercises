@@ -3,6 +3,8 @@ require 'bcrypt'
 class User < ActiveRecord::Base
   attr_accessible :username, :password
 
+  has_many :cats
+
   def self.find_by_credentials(username, raw_pass)
     u = User.find_by_username(username)
     if u and u.is_password?(raw_pass)

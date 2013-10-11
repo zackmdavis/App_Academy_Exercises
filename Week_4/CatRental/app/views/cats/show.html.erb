@@ -19,11 +19,13 @@
 			</tr>
 		<% end %>
 	</table>
-	<% if request.status == "PENDING" %>
-		<%= button_to "Approve!", approve_rental_request_url(request.id),
-  :method => :put %>
-		<%= button_to "Deny!", deny_rental_request_url(request.id),
-  :method => :put %>
-	<% end %>
+	<% if current_user == @cat.owner %>
+		<% if request.status == "PENDING" %>
+			<%= button_to "Approve!", approve_rental_request_url(request.id),
+	  :method => :put %>
+			<%= button_to "Deny!", deny_rental_request_url(request.id),
+	  :method => :put %>
+		<% end %>
+	<% end%>
 	<br>
 <% end %>

@@ -1,5 +1,5 @@
 class Cat < ActiveRecord::Base
-  attr_accessible :age, :birth_date, :color, :name, :sex
+  attr_accessible :age, :birth_date, :color, :name, :sex, :user_id
   validates :age, :birth_date, :color, :name, :sex, :presence => true
   validates :age, :numericality => true
   validates :sex, :inclusion => { :in => %w[M F], :message => "Sex must be 'M' or 'F'" }
@@ -11,6 +11,8 @@ class Cat < ActiveRecord::Base
     :foreign_key => :cat_id,
     :dependent => :destroy
   )
+
+  belongs_to :owner, :class_name => "User", :foreign_key => :user_id
 
   def attributes
     attributes = {:name => name, :age => age, :birth_date => birth_date, :color => color, :sex => sex}
