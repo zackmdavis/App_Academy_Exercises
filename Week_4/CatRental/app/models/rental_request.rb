@@ -13,11 +13,24 @@ class RentalRequest < ActiveRecord::Base
   )
 
   def ensure_pending_if_unspecified
-    status ||= "PENDING"
+    self.status ||= "PENDING"
   end
 
   def attributes
     attributes = {:start_date => start_date, :end_date => end_date, :status => status}
+  end
+
+  def approve!
+    overlapping = overlapping_pending_requests
+    transaction do
+      self.update_attributes(:status => "APPROVED")
+      overlapping.update_all(:status => "DENIED")
+    end
+  end
+
+  def deny!
+    self.status = "DENIED"
+    self.save
   end
 
   def overlapping_requests
@@ -28,6 +41,16 @@ class RentalRequest < ActiveRecord::Base
   def overlapping_approved_requests
     overlapping_requests.where(:status => "APPROVED")
   end
+
+  def overlapping_pending_requests
+    overlapping_requests.where(:status => "PENDING")
+  end
+
+  def pending?
+    status == "PENDING"
+  end
+
+  private
 
   def approved_requests_do_not_overlap
     unless overlapping_approved_requests.empty?

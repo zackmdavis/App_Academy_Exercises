@@ -8,7 +8,7 @@
 	<% end %>
 </table>
 <br><br>
-<b>Requests:</b>
+<b>Requests:</b> <% if @cat.rental_requests.empty? %> <%= "None"%> <% end %>
 <br><br>
 <% @cat.rental_requests.each_with_index do |request, index| %>
 	request #<%= index + 1 %>
@@ -19,5 +19,11 @@
 			</tr>
 		<% end %>
 	</table>
+	<% if request.status == "PENDING" %>
+		<%= button_to "Approve!", approve_rental_request_url(request.id),
+  :method => :put %>
+		<%= button_to "Deny!", deny_rental_request_url(request.id),
+  :method => :put %>
+	<% end %>
 	<br>
 <% end %>

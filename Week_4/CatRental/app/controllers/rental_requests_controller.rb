@@ -59,4 +59,16 @@ class RentalRequestsController < ApplicationController
     render :index
   end
 
+  def approve
+    @rental_request = RentalRequest.find(params[:id])
+    @rental_request.approve!
+    redirect_to cat_url(@rental_request.cat_id)
+  end
+
+  def deny
+    @rental_request = RentalRequest.find(params[:id])
+    @rental_request.deny!
+    redirect_to cat_url(@rental_request.cat_id)
+  end
+
 end
