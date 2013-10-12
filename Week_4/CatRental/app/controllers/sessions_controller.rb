@@ -10,7 +10,9 @@ class SessionsController < ApplicationController
 
     unless user.nil?
       login!(user)
-
+      location = request.location.country
+      flash[:messages] ||= []
+      flash[:messages] << "Logged in from #{location}"
       redirect_to cats_url
     else
       flash[:errors] ||= []
@@ -21,8 +23,7 @@ class SessionsController < ApplicationController
   end
 
   def destroy
-    session[:session_token] = nil
-
+    session[:session_token] = ''
     flash[:messages] ||= []
     flash[:messages] << "You have been successfully logged out!"
     redirect_to cats_url

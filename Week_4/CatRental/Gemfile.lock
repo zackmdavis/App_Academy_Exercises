@@ -40,6 +40,7 @@ GEM
     coffee-script-source (1.6.3)
     erubis (2.7.0)
     execjs (2.0.2)
+    geocoder (1.1.8)
     hike (1.2.3)
     i18n (0.6.5)
     journey (1.0.4)
@@ -106,6 +107,7 @@ PLATFORMS
 DEPENDENCIES
   bcrypt-ruby (~> 3.0.0)
   coffee-rails (~> 3.2.1)
+  geocoder
   jquery-rails
   rails (= 3.2.12)
   sass-rails (~> 3.2.3)
