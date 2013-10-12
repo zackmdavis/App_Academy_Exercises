@@ -207,11 +207,11 @@ class GametreeNode
     if depth == 0
       @value = AIPlayer.heuristic_evaluation_function(state)
     else
-      child_boards = ChessBoard.possible_next_boards(@state, TURN_TO_COLOR[(@turn + 1) % 2])
+      child_boards = ChessBoard.possible_next_boards(@state, TURN_TO_COLOR[@turn])
       if child_boards.empty?
         @value = AIPlayer.heuristic_evaluation_function(state)
       else
-        @children = child_boards.map do |board| 
+        @children = child_boards.map do |board|
           child = GametreeNode.new(board[1], (@turn + 1) % 2)
           child.parent = self
           child.previous_move = board[0]
@@ -252,8 +252,6 @@ class AIPlayer
           unless square.nil?
             piece = square
             piece_value = PIECE_VALUES[piece.class.to_s]
-            p piece
-            p piece.class.to_s
             player_multiplier = (piece == :white) ? 1 : -1
             score += piece_value * player_multiplier
           end
