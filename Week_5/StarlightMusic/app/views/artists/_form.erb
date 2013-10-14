@@ -1,0 +1,13 @@
+<% if action == :edit %>
+	<form action="<%= artist_url(artist) %>" method="post" accept-charset="utf-8">
+<% elsif action == :new %>
+	<form action="<%= artists_url %>" method="post" accept-charset="utf-8">
+<% end %>
+<input type="hidden"
+			 name="authenticity_token"
+			 value="<%= form_authenticity_token %>">
+
+<b>Name:</b> <input type="text" name="artist[name]" value="<%= artist.name %>">
+
+<p><input type="submit" value="Submit &rarr;"></p>
+</form>

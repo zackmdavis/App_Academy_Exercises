@@ -1,0 +1,4 @@
+<h2>Artist Index</h2>
+<% @artists.each do |artist| %>
+<p><%= link_to(artist.name, artist_url(artist.id)) %></p>
+<% end %>

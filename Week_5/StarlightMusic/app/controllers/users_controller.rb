@@ -44,7 +44,7 @@ class UsersController < ApplicationController
     if @user.update_attributes(params[:user])
       render :show
     else
-      flash_error("ERROR; could not create user")
+      flash_error("something went wrong!!---could not update user")
       render :edit
     end
   end
