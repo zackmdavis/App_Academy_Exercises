@@ -19,7 +19,7 @@ class SessionsController < ApplicationController
   end
 
   def destroy
-    session[:session_token] = ''
+    session[:session_token] = SecureRandom.urlsafe_base64(10)
     flash_message("You have been successfully logged out!!")
     redirect_to root_url
   end
