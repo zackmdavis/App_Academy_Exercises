@@ -1,5 +1,6 @@
 <% if action == :edit %>
 	<form action="<%= artist_url(artist) %>" method="post" accept-charset="utf-8">
+		<input type="hidden" name="_method" value="PUT">
 <% elsif action == :new %>
 	<form action="<%= artists_url %>" method="post" accept-charset="utf-8">
 <% end %>

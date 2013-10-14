@@ -1,0 +1,9 @@
+<p><b><%= @album.title %></b></p>
+<p><%= Artist.find(@album.artist_id).name %></p>
+<p><b>Tracks</b>
+	<ul>
+		<% @album.tracks.each do |track|%>
+			<li>"<%= link_to( "#{track.title}", track_url(track.id)) %>"</li>
+		<% end %>
+	</ul>
+</p>

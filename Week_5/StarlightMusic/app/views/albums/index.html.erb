@@ -1,0 +1,4 @@
+<h3>Album Index</h3>
+<% @albums.each do |album| %>
+<p><em><%= link_to(album.title, album_url(album.id)) %></em> by <%= album.artist.name %></p>
+<% end %>

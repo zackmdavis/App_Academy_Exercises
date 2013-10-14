@@ -1,0 +1,10 @@
+<p>"<%= @track.title %>"</p>
+<p>from <em><%= link_to "#{@track.album.title}", album_url(@track.album_id) %></em> by <%= link_to "#{@track.artist.name}", artist_url(@track.album.artist_id)%></p>
+
+<p><strong>Lyrics:</strong></p>
+<% if @track.lyrics.nil? or @track.lyrics == '' %>
+	<p><em>(lyrics not available)</em></p>
+<% else %>
+	<pre><%= @track.lyrics %></pre>
+<% end %>
+</p>

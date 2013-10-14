@@ -8,13 +8,8 @@ StarlightMusic::Application.routes.draw do
 
   resources :users
 
-  resources :artists do
-    resources :albums, :only => [:index, :new, :create]
-    resources :tracks, :only => [:index]
-  end
-  resources :albums, :only => [:show, :edit, :update, :destroy] do
-    resources :tracks, :only => [:new, :create]
-  end
-  resources :tracks, :only => [:show, :edit, :update, :destroy]
+  resources :artists
+  resources :albums
+  resources :tracks, :only => [:show, :new, :create, :edit, :update, :destroy]
 
 end

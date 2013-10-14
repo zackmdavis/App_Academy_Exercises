@@ -1,0 +1,24 @@
+<% if action == :edit %>
+	<form action="<%= track_url(track) %>" method="post" accept-charset="utf-8">
+		<input type="hidden" name="_method" value="PUT">
+<% elsif action == :new %>
+	<form action="<%= tracks_url %>" method="post" accept-charset="utf-8">
+<% end %>
+
+<input type="hidden"
+			 name="authenticity_token"
+			 value="<%= form_authenticity_token %>">
+
+<b>Title:</b> <input type="text" name="track[title]" value="<%= track.title %>">
+<% artists = Artist.all %>
+<b>Album:</b><select name="track[album_id]" value="<%= track.album_id %>">
+	<% artists.each do |artist| %>
+		<option value="<%= album.id %>"><%= album.title %></option>
+	<% end %>
+</select>
+<b>Lyrics:</b><br>
+<textarea name="track[lyrics]"><%= track.lyrics %></textarea>
+
+<p><input type="submit" value="Submit &rarr;"></p>
+
+</form>

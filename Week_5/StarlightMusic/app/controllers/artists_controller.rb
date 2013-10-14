@@ -32,8 +32,7 @@ class ArtistsController < ApplicationController
 
   def update
     @artist = Artist.find(params[:id])
-
-    if @artist.update_attributes(params[:artist])
+    if @artist.update_attributes(params["artist"])
       render :show
     else
       flash_error("something went wrong!!---could not edit artist")

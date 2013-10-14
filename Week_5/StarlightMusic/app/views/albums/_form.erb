@@ -1,0 +1,22 @@
+<% if action == :edit %>
+	<form action="<%= album_url(album) %>" method="post" accept-charset="utf-8">
+		<input type="hidden" name="_method" value="PUT">
+<% elsif action == :new %>
+	<form action="<%= albums_url %>" method="post" accept-charset="utf-8">
+<% end %>
+
+<input type="hidden"
+			 name="authenticity_token"
+			 value="<%= form_authenticity_token %>">
+
+<b>Title:</b> <input type="text" name="album[title]" value="<%= album.title %>">
+<% artists = Artist.all %>
+<b>Artist:</b><select name=album[artist_id] value="<% album.artist_id %>">
+	<% artists.each do |artist| %>
+		<option value="<%= artist.id %>"><%= artist.name %></option>
+	<% end %>
+</select>
+
+<p><input type="submit" value="Submit &rarr;"></p>
+
+</form>

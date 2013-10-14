@@ -29,7 +29,30 @@ al2 = Album.create(:title => "Misfits Forever", :artist_id => 2)
 
 # starting tracks
 t1 = Track.create(:title => "Only the Beginning", :album_id => 1)
-t2 = Track.create(:title => "Getting Down to Business", :album_id => 1)
+t2_l = %Q[We've just been playing
+Fooling around
+While everybody else is out there
+Covering ground
+We've got to take a whole new tack
+To get back on the track
+
+And it's time we get started
+Getting down to business
+Time we get started
+Getting down to business
+
+They're all saying
+We don't have a chance
+We don't wanna let them
+Write us off in advance
+There's only one thing we can do (one thing)
+To make our dreams come true
+
+And it's time we get started
+Gettin' down to business
+Time we get started
+Gettin' down to business]
+t2 = Track.create(:title => "Getting Down to Business", :album_id => 1, :lyrics => t2_l)
 
 
 t20 = Track.create(:title => "Out of My Way", :album_id => 2)
