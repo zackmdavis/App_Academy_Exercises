@@ -41,9 +41,10 @@ class AlbumsController < ApplicationController
   end
 
   def destroy
-    Album.find(params[:id]).destroy
+    @album = Album.find(params[:id])
+    @artist_id = @album.artist_id
+    @album.destroy
     flash_message("Album destroyed!!")
-    render :index
+    redirect_to artist_url(@artist_id)
   end
-
 end

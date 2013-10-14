@@ -1,4 +1,4 @@
 <h3>Artist Index</h3>
 <% @artists.each do |artist| %>
-<p><%= link_to(artist.name, artist_url(artist.id)) %></p>
+<p><%= link_to(artist.name, artist_url(artist.id)) %> <%= render :partial => "shared/button_to_destroy", :locals => {:resource => "artists", :id => artist.id}%> </p>
 <% end %>

@@ -36,9 +36,11 @@ class TracksController < ApplicationController
   end
 
   def destroy
-    Track.find(params[:id]).destroy
+    @track = Track.find(params[:id])
+    @album_id = @track.album_id
+    @track.destroy
     flash_message("Track destroyed!!")
-    render :index
+    redirect_to album_url(@album_id)
   end
 
 end

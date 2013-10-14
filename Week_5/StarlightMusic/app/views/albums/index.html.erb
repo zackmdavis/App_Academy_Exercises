@@ -1,4 +1,4 @@
 <h3>Album Index</h3>
 <% @albums.each do |album| %>
-<p><em><%= link_to(album.title, album_url(album.id)) %></em> by <%= album.artist.name %></p>
+<p><em><%= link_to(album.title, album_url(album.id)) %></em> by <%= album.artist.name %> <%= render :partial => "shared/button_to_destroy", :locals => {:resource => "albums", :id => album.id}%></p>
 <% end %>

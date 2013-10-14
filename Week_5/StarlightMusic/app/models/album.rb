@@ -2,6 +2,6 @@ class Album < ActiveRecord::Base
   attr_accessible :artist_id, :title
 
   belongs_to :artist
-  has_many :tracks
+  has_many :tracks, :dependent => :destroy
 
 end

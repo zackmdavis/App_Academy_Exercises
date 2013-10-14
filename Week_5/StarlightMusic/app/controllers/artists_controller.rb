@@ -43,6 +43,7 @@ class ArtistsController < ApplicationController
   def destroy
     Artist.find(params[:id]).destroy
     flash_message("Artist destroyed!!")
+    @artists = Artist.all
     render :index
   end
 
