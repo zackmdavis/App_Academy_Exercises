@@ -11,3 +11,83 @@
  *= require_self
  *= require_tree .
  */
+
+body {
+	background-color:#FCD7ED;
+}
+
+body a{
+	color:#B95290;
+	font-weight: bold;
+}
+
+h2 {
+	font-family: 'Yellowtail', cursive;
+	font-size: 45px;
+	margin: 0px;
+}
+
+h2 a{
+	font-family: 'Yellowtail', cursive;
+	font-size: 45px;
+	color:#000000;
+	text-decoration:none;
+	margin: 0px;
+}
+
+h3 {
+	font-family: 'Yellowtail', cursive;
+	font-size: 25px;
+}
+
+h3 a{
+	font-family: 'Yellowtail', cursive;
+	font-size: 25px;
+	color:#000000;
+	text-decoration:none;
+}
+
+label{
+  width: 7em;
+  float: left;
+  text-align: center;
+  margin-right: 1 em;
+  display: block
+}
+
+.flash {
+	font-style:italic;
+	font-weight:bold;
+}
+
+.flash.errors {
+	color:#AA0000;
+	background-color:#EEBBCC;
+}
+
+.flash.messages {
+	color: #007030;
+	background-color: #CEEECC;
+}
+
+.buttonlink {
+	font-size: 20px;
+	background-color: #9877AE;
+}
+
+.buttonlink a{
+	color:#FCF7FD;
+	text-decoration:none;
+	font-weight:bold;
+}
+
+.navlink {
+	font-size: 20px;
+	background-color: #5C729A;
+}
+
+.navlink a{
+	color:#FCF7FD;
+	text-decoration:none;
+	font-weight:bold;
+}

@@ -1,4 +1,4 @@
-<h2>New User!</h2>
+<h3>New User!</h3>
 <form action="<%= users_url %>" method="post" accept-charset="utf-8">
 	<input type="hidden"
 				 name="authenticity_token"
@@ -10,8 +10,8 @@
 	<label for="password"><b>Password:</b> </label>
 	<input type="password" name="user[password]" id="password" placeholder="password">
 	<br>
-	<label for="confirm_password"><b>Confirm Password:</b> </label>
-	<input type="password" name="confirm_password" id="confirm_password" placeholder="confirm password">
+	<label for="confirm_password"><b>Confirm:</b> </label>
+	<input type="password" name="confirm_password" id="confirm_password" placeholder="retype password">
 
 	<p><input type="submit" value="Login &rarr;"></p>
 </form>

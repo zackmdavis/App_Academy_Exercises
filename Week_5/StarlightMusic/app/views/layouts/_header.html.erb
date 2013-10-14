@@ -1,5 +1,5 @@
-<h1><a href="/">Starlight Music</a></h1>
-
+<h2><a href="/">Starlight Music</a></h2>
+<%= image_tag "starlight.jpg" %>
 <% flash.each do |type, messages| %>
 	<p>
 		<div class="flash <%= type %>">
@@ -13,11 +13,16 @@
 <% end %>
 <% user = current_user %>
 <% if user.nil? %>
-	<p><%= link_to "Log in", login_url, method: :get %></p>
-	<p><%= link_to "Sign up", new_user_url, method: :get %></p>
+	<p>
+		<span class="buttonlink">&nbsp;&nbsp;<%= link_to "Log in", login_url, method: :get %>&nbsp;&nbsp;</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<span class="buttonlink">&nbsp;&nbsp;<%= link_to "Sign up", new_user_url, method: :get %>&nbsp;&nbsp;</span>
+	</p>
 <% else %>
 	<p>logged in as <b><%= user.email %></b></p>
-	<p><%= link_to "Log out", logout_url, :method => :delete %></p>
+	<p><span class="buttonlink">&nbsp;&nbsp;<%= link_to "Log out", logout_url, :method => :delete %>&nbsp;&nbsp;</span></p>
 <% end %>
+<p>
+	<span class="navlink">&nbsp;&nbsp;<%= link_to "Users", users_url, method: :get %>&nbsp;&nbsp;</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	<span class="navlink">&nbsp;&nbsp;<%= link_to "Artists", artists_url, method: :get %>&nbsp;&nbsp;</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</p>
 <hr>
-<br><br>

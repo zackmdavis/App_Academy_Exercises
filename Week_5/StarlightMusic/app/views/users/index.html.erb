@@ -1,6 +1,5 @@
-<h2>Users</h2>
+<h3>Users</h3>
 
 <% @users.each do |user| %>
-<p>user</p>
-	<p><b><%= user.email %></b></p>
+	<p><%= link_to(user.email, user_url(user.id)) %></p>
 <% end %>
