@@ -1,0 +1,15 @@
+<h2>Log in!</h2>
+<form action="<%= login_url %>" method="post" accept-charset="utf-8">
+	<input type="hidden"
+				 name="authenticity_token"
+				 value="<%= form_authenticity_token %>">
+
+	<label for="email"><b>Username:</b> </label>
+	<input type="text" name="user[email]" id="email" placeholder = "email">
+	<br>
+	<label for="password"><b>Password:</b> </label>
+	<input type="password" name="user[password]" id="password" placeholder="password">
+	<br>
+
+	<p><input type="submit" value="Login &rarr;"></p>
+</form>
