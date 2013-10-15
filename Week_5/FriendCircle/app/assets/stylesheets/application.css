@@ -11,3 +11,10 @@
  *= require_self
  *= require_tree .
  */
+
+h1 {
+	font-family: 'Concert One';
+	font-size: 50px;
+	color:#2200AA;
+	margin: 0px;
+}
