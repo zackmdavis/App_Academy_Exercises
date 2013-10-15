@@ -10,6 +10,9 @@ StarlightMusic::Application.routes.draw do
 
   resources :artists
   resources :albums
-  resources :tracks, :only => [:show, :new, :create, :edit, :update, :destroy]
+  resources :tracks, :only => [:show, :new, :create, :edit, :update, :destroy] do
+    resources :notes, :only => [:new]
+  end
+  resources :notes, :only => [:create, :edit, :update, :destroy]
 
 end

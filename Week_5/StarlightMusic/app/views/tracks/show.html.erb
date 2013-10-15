@@ -8,3 +8,7 @@
 	<pre><%= @track.lyrics %></pre>
 <% end %>
 </p>
+
+<%= render "notes/notes", :notes => @track.notes %>
+
+<span class="actionlink">&nbsp;&nbsp;<%= link_to "New Note", new_track_note_url(@track.id), method: :get %>&nbsp;&nbsp;</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;

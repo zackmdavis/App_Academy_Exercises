@@ -1,0 +1,9 @@
+<p><strong>Notes:</strong></p>
+<% if notes.empty? %>
+	<p><em>(no notes on this track)</em></p>
+<% else %>
+	<% notes.each do |note| %>
+	<p><%= note.body %> &mdash;note submitted by <em><%= note.user.email %></em>
+		<%= render :partial => "shared/button_to_destroy", :locals => {:resource => "/notes", :id => note.id}%></p>
+	<% end %>
+<% end %>

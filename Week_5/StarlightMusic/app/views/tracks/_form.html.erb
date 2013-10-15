@@ -10,12 +10,14 @@
 			 value="<%= form_authenticity_token %>">
 
 <b>Title:</b> <input type="text" name="track[title]" value="<%= track.title %>">
-<% artists = Artist.all %>
+<% artists = Artist.all %><br>
 <b>Album:</b><select name="track[album_id]" value="<%= track.album_id %>">
 	<% artists.each do |artist| %>
-		<option value="<%= album.id %>"><%= album.title %></option>
+		<% artist.albums.each do |album|%>
+				<option value="<%= album.id %>"><%= album.title %></option>
+			<% end %>
 	<% end %>
-</select>
+</select><br>
 <b>Lyrics:</b><br>
 <textarea name="track[lyrics]"><%= track.lyrics %></textarea>
 

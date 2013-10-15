@@ -91,3 +91,14 @@ label{
 	text-decoration:none;
 	font-weight:bold;
 }
+
+.actionlink {
+	font-size: 20px;
+	background-color: #B85466;
+}
+
+.actionlink a{
+	color:#FCF7FD;
+	text-decoration:none;
+	font-weight:bold;
+}

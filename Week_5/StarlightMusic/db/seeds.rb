@@ -57,3 +57,7 @@ t2 = Track.create(:title => "Getting Down to Business", :album_id => 1, :lyrics 
 
 t20 = Track.create(:title => "Out of My Way", :album_id => 2)
 t21 = Track.create(:title => "Winning Is Everything", :album_id => 2)
+
+# starting notes
+n1_b = "This song inspires me near the end of a long day at the office"
+n1 = Note.create(:track_id => 2, :user_id => 2, :body => n1_b)
