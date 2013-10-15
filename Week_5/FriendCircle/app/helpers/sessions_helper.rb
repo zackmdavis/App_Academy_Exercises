@@ -1,7 +1,11 @@
 module SessionsHelper
 
+  def current_user=(user)
+    @current_user = user
+    session[:session_token] = user.session_token
+  end
+
   def current_user
-    return nil unless session[:session_token]
     @current_user ||= User.find_by_session_token(session[:session_token])
   end
 
@@ -10,13 +14,13 @@ module SessionsHelper
   end
 
   def login!(user)
-    session[:session_token] = user.reset_session_token!
+    user.reset_session_token!
+    self.current_user = user
   end
 
   def logout!
-    session[:session_token] = nil
-    user.reset_session_token!
+    self.current_user.reset_session_token!
+    session[:session_token] = SecureRandom.urlsafe_base64(6)
   end
-
 
 end

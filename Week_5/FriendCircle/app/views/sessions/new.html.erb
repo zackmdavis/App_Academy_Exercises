@@ -1,0 +1,15 @@
+<h3>Log in!</h3>
+<form action="<%= login_url %>" method="post" accept-charset="utf-8">
+	<input type="hidden"
+				 name="authenticity_token"
+				 value="<%= form_authenticity_token %>">
+
+	<label for="email"><strong>Username:</strong></label>
+	<input type="text" name="user[email]" id="email" placeholder="email">
+	<br>
+	<label for="password"><strong>Password:</strong></label>
+	<input type="password" name="user[password]" id="password" placeholder="password">
+	<br>
+
+	<p><input type="submit" value="Log in to Friend Circle! &rarr;"></p>
+</form>

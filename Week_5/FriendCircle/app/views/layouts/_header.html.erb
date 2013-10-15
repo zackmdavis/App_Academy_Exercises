@@ -1,0 +1,10 @@
+<h1>Friend Circle</h1>
+<% if current_user %>
+	<p>logged in as <%= current_user.email %></p>
+	<%= button_to "Log out from Friend Circle?!", logout_url, :method => :delete %>
+<% else %>
+	<p><em>not</em> logged in as guest</p>
+	<%= button_to "Log in to Friend Circle!", login_url, :method => :get %>
+	<%= button_to "Sign up for Friend Circle!", new_user_url, :method => :get %>
+<% end %>
+<hr>
