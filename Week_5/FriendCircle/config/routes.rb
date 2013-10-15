@@ -6,6 +6,9 @@ FriendCircle::Application.routes.draw do
   post 'login', :to => "sessions#create"
   delete 'logout', :to => "sessions#destroy"
 
+  get 'users/passwordreset', :to => "users#password_reset"
+  get 'users/:id/requestpasswordreset', :to => "users#request_password_reset"
+
   resources :users
 
   resource :session, :only => [:new, :create, :destroy]

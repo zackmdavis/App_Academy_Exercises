@@ -1,4 +1,17 @@
 <h1>Friend Circle</h1>
+<% if flash[:errors] %>
+	<% flash[:errors].each do |msg| %>
+		<p><strong><%= msg %></strong></p>
+	<% end %>
+<% end %>
+
+<% if flash[:messages] %>
+	<% flash[:messages].each do |msg| %>
+		<p><strong><%= msg %></strong></p>
+	<% end %>
+<% end %>
+
+
 <% if current_user %>
 	<p>logged in as <%= current_user.email %></p>
 	<%= button_to "Log out from Friend Circle?!", logout_url, :method => :delete %>
