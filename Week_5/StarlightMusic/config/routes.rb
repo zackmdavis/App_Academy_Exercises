@@ -6,6 +6,8 @@ StarlightMusic::Application.routes.draw do
   post 'login', :to => "sessions#create"
   delete 'logout', :to => 'sessions#destroy'
 
+  get 'users/activate', :to => "users#activate"
+
   resources :users
 
   resources :artists

@@ -18,15 +18,18 @@ class UsersController < ApplicationController
   end
 
   def create
-    @user = User.new(params[:user])
+    @user = User.new(params[:user].merge(:active => false))
     @user.session_token = ''
+    @user.activation_token = @user.class.generate_activation_token
     if params["user"]["password"] != params["confirm_password"]
       flash_error("Password confirmation doesn't match!!")
       render :new
     else
       if @user.save
-        login!(@user)
-        render :show
+        signup_email = UserMailer.signup_email(@user)
+        signup_email.deliver
+        flash_message("Check your email to activate your account!")
+        redirect_to root_url
       else
         flash_error("something went wrong!!--could not create user")
         render :new
@@ -53,6 +56,19 @@ class UsersController < ApplicationController
     User.find(params[:id]).destroy
     flash_message("User destroyed!!")
     redirect_to root_url
+  end
+
+  def activate
+    @user = User.find_by_activation_token(params[:activation_token])
+    @user.active = true
+    if @user.save
+      flash_message("Account activated!")
+      login!(@user)
+      redirect_to root_url
+    else
+      flash_error("something went wrong!!---could not activate account")
+      redirect_to root_url
+    end
   end
 
 end

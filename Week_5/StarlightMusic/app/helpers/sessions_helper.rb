@@ -10,8 +10,12 @@ module SessionsHelper
   end
 
   def login!(user)
-    user.reset_session_token!
-    self.current_user = user
+    if user.active?
+      user.reset_session_token!
+      self.current_user = user
+    else
+      flash_error("User is inactive!!")
+    end
   end
 
   def logged_in?(user)

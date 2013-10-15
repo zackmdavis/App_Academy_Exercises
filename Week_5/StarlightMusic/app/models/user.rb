@@ -1,10 +1,14 @@
 require 'bcrypt'
 
 class User < ActiveRecord::Base
-  attr_accessible :email, :password
+  attr_accessible :email, :password, :active, :activation_token
 
   def self.generate_session_token
     SecureRandom.urlsafe_base64(16)
+  end
+
+  def self.generate_activation_token
+    SecureRandom.urlsafe_base64(9)
   end
 
   def self.find_by_credentials(email, pass)
@@ -14,6 +18,11 @@ class User < ActiveRecord::Base
     else
       return nil
     end
+  end
+
+  def reset_activation_token!
+    self.activation_token = self.class.generate_activation_token
+    self.save
   end
 
   def reset_session_token!
@@ -27,6 +36,10 @@ class User < ActiveRecord::Base
 
   def is_password?(pass)
     BCrypt::Password.new(self.password_digest).is_password?(pass)
+  end
+
+  def active?
+    !!active
   end
 
 end
