@@ -8,6 +8,11 @@
 </head>
 <body>
 
+	<!-- thanks to solutions for reminding me about the conditional and signout button here -->
+	<% if logged_in? %>
+	  <%= current_user.username %>
+	  <%= button_to "Sign Out", session_url, :method => :delete %>
+	<% end %>
 <%= yield %>
 
 </body>

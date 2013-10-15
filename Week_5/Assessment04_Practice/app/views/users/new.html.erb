@@ -1,10 +1,13 @@
 <h1>Sign Up</h1>
-<% flash[:errors].each do |message| %>
-	<p>message</p>
+<% if !flash[:errors].nil?%>
+	<% flash[:errors].each do |message| %>
+		<p><%= message %></p>
+	<% end %>
+
 <% end %>
 <form action="<%= users_url %>" method="post" accept-charset="utf-8">
-	<label>Username</label> <input type="text" name="user[Username]"></text>
-	<label>Password</label> <input type="password" name="user[Password]"></text>
+	<label for="username">Username</label> <input id="username" type="text" name="user[username]"></text>
+	<label for="password">Password</label> <input id="password" type="password" name="user[password]"></text>
 
 	<p><input type="submit" value="Sign Up"></p>
 </form>
