@@ -3,9 +3,18 @@
 				 name="authenticity_token"
 				 value="<%= form_authenticity_token %>">
 
-<% User.all.each do |user| %>
-<input type="checkbox" name="circle[circle_memberships][]">
+				 <label for="circle_name"><strong>Circle name:</strong></label>
+				 <input type="text" name="circle[name]" id="circle_name">
 
+				 <p>Include some friends in the Friend Circle!</p>
+<% User.all.each do |user| %>
+<input type="checkbox"
+			 name="circle[circled_friend_ids][]"
+			 value="<%= user.id %>"
+			 id="user<%= user.id %>">
+			 <label for="user<%= user.id %>">
+				 <%= user.email %>
+			 </label>
 <% end %>
 
 	<p><input type="submit" value="Create a Friend Circle!"></p>

@@ -1,2 +1,15 @@
 <h3>User page!</h3>
-<p>This is the user page for <%= @user.email %></p>
+<p>This is the user page for <em><%= @user.email %></em></p>
+
+<% @user.circles.each do |circle| %>
+	<p>The circle called "<%= circle.name %>" contains these friends&mdash;</p>
+		<% if !circle.circled_friends.empty? %>
+			<ul>
+			<% circle.circled_friends.each do |friend|%>
+				<li><%= friend.email %></li>
+			<% end %>
+			</ul>
+		<% else %>
+		<p><em>(no one in this circle right now)</em></p>
+		<% end %>
+<% end %>
