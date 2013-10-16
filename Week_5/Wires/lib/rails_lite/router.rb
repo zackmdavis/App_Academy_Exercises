@@ -15,7 +15,12 @@ class Route
   end
 
   def run(request, response)
-    controller_name.constantize.new(request, response).invoke_action(action_name)
+    match = @pattern.match(request.path)
+    route_params = {}
+    match.names.each do |name|
+      route_params[name] = match[name]
+    end
+    controller_name.constantize.new(request, response, route_params).invoke_action(action_name)
   end
 end
 

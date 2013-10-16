@@ -7,7 +7,7 @@ class Params
     body_string = request.body
     query_string = request.query_string
     param_string = [body_string, query_string].join('&')
-    @params = Params.parse_www_encoded_form(param_string)
+    @params = route_params.merge(Params.parse_www_encoded_form(param_string))
   end
 
   def [](key)
