@@ -12,8 +12,8 @@ trap('INT') { server.shutdown }
 
 class MyController < ControllerBase
   def go
-    render_content("hello world!", "text/html")
-
+    #render_content("hello world!", "text/html")
+    redirect_to('http://zackmdavis.net/blog')
     # after you have template rendering, uncomment:
 #    render :show
 
