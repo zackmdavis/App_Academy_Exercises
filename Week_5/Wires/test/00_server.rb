@@ -13,9 +13,10 @@ trap('INT') { server.shutdown }
 class MyController < ControllerBase
   def go
     #render_content("hello world!", "text/html")
-    redirect_to('http://zackmdavis.net/blog')
+    #redirect_to('http://zackmdavis.net/blog')
     # after you have template rendering, uncomment:
-#    render :show
+    @title = "This is the Title"
+    render :show
 
     # after you have sessions going, uncomment:
 #    session["count"] ||= 0
