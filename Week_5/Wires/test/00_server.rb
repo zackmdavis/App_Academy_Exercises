@@ -15,13 +15,13 @@ class MyController < ControllerBase
     #render_content("hello world!", "text/html")
     #redirect_to('http://zackmdavis.net/blog')
     # after you have template rendering, uncomment:
-    @title = "This is the Title"
-    render :show
+    # @title = "This is the Title"
+#     render :show
 
     # after you have sessions going, uncomment:
-#    session["count"] ||= 0
-#    session["count"] += 1
-#    render :counting_show
+   session["count"] ||= 0
+   session["count"] += 1
+   render :counting_show
   end
 end
 
