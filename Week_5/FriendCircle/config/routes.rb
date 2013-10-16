@@ -9,7 +9,9 @@ FriendCircle::Application.routes.draw do
   get 'users/passwordreset', :to => "users#password_reset"
   get 'users/:id/requestpasswordreset', :to => "users#request_password_reset"
 
-  resources :users
+  resources :users do
+    resources :circles
+  end
 
   resource :session, :only => [:new, :create, :destroy]
 

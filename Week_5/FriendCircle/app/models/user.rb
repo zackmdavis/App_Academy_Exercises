@@ -4,6 +4,9 @@ class User < ActiveRecord::Base
   attr_accessible :email, :password, :session_token, :reset_token
   validates :email, :uniqueness => true
 
+  has_many :circle_memberships
+  has_many :circles
+
   def self.generate_session_token
     SecureRandom.urlsafe_base64(16)
   end
