@@ -9,6 +9,8 @@ class ControllerBase
   def initialize(request, response, route_params = {})
     @request = request
     @response = response
+    session
+    @params = Params.new(request, route_params)
     @already_built_response = false
   end
 
