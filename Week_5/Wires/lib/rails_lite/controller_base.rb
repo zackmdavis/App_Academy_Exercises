@@ -44,5 +44,7 @@ class ControllerBase
   end
 
   def invoke_action(name)
+    send(name)
   end
+
 end
