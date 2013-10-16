@@ -1,0 +1,5 @@
+require_relative './sedentaryrecord/associatable'
+require_relative './sedentaryrecord/db_connection'
+require_relative './sedentaryrecord/mass_object'
+require_relative './sedentaryrecord/searchable'
+require_relative './sedentaryrecord/sql_object'

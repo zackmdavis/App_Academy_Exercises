@@ -1,7 +1,7 @@
 require 'active_support/core_ext'
 require 'json'
 require 'webrick'
-require_relative '../lib/rails_lite'
+require_relative '../lib/wires'
 
 server = WEBrick::HTTPServer.new :Port => 8080
 trap('INT') { server.shutdown }
