@@ -3,7 +3,7 @@
 FactoryGirl.define do
   factory :link do
     title "MyString"
-    url "MyString.com"
-    submitter_id 1
+    url "http://www.MyString.com"
+    submitter { FactoryGirl.create(:user) }
   end
 end

@@ -1,6 +1,8 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery
 
+  include SessionsHelper
+
   def flash_error(text)
     flash[:errors] ||= []
     flash[:errors] << text

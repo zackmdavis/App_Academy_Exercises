@@ -1,13 +1,24 @@
 require 'spec_helper'
 
 describe Link do
-  it "should have a valid factory" do
-    expect(FactoryGirl.build(:sub)).to be_valid
+
+  let(:user) { FactoryGirl.create(:user) }
+  let(:link) { FactoryGirl.create(:link) }
+
+  it "has a valid factory" do
+    expect(link).to be_valid
   end
 
-  it "should have a submitter" do
-    u = FactoryGirl.create(:user)
-    expect(FactoryGirl.build())
+  it "validates presence of title" do
+    expect(FactoryGirl.build(:link, :title => nil)).not_to be_valid
+  end
+
+  it "validates presence of url" do
+    expect(FactoryGirl.build(:link, :url => nil)).not_to be_valid
+  end
+
+  it "has a submitter" do
+    expect(link.submitter).to be_instance_of(User)
   end
 
 end

@@ -6,7 +6,9 @@ RedditClone::Application.routes.draw do
 
   resources :users
 
-  resources :subs
+  resources :subs do
+    resources :links
+  end
 
   root :to => "users#index"
 end

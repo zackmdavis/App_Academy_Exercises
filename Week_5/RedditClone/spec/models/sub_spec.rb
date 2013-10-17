@@ -14,4 +14,6 @@ describe Sub do
     expect(FactoryGirl.build(:sub, :mod_id => u.id).moderator).to eq(u)
   end
 
+
+
 end

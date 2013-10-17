@@ -1,0 +1,4 @@
+<h2><%= @sub.name %> links</h2>
+<% @sub.links.each do |link| %>
+	<p><%= link_to link.title, link.url %></p>
+<% end %>
