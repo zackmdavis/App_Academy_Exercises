@@ -8,6 +8,7 @@ class User < ActiveRecord::Base
 
   has_many :moderated_subs, :foreign_key => :mod_id, :class_name => "Sub"
   has_many :links, :foreign_key => :submitter_id
+  has_many :comments, :foreign_key => :author_id
 
   def password=(pass)
     @password = pass

@@ -7,4 +7,5 @@ class Link < ActiveRecord::Base
 
   belongs_to :submitter, :class_name => "User"
   belongs_to :sub
+  has_many :comments
 end

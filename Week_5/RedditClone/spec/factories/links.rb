@@ -3,7 +3,7 @@
 FactoryGirl.define do
   factory :link do
     title "MyString"
-    url "http://www.MyString.com"
+    url Faker::Internet.url
     submitter { FactoryGirl.create(:user) }
   end
 end

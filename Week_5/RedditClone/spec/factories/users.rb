@@ -2,7 +2,9 @@
 
 FactoryGirl.define do
   factory :user do
-    username "MyString"
+    sequence :username do |n|
+      Faker::Internet.user_name
+    end
     password "MyString"
   end
 end
