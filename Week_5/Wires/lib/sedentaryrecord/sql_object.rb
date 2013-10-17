@@ -38,9 +38,9 @@ class SQLObject < MassObject
 
   def create
     attributes_string = '('+self.class.attributes.join(', ')+')'
-    query = %Q[INSERT INTO #{self.class.table_name attributes_string}
-      VALUES #{self.question_marks(atrribute_names.length)};]
-    attribute_values = attribute_names.map { |name| self.send(name) }
+    query = %Q[INSERT INTO #{self.class.table_name} #{attributes_string}
+      VALUES #{self.class.question_marks(self.class.attributes.length)};]
+    attribute_values = self.class.attributes.map { |name| self.send(name) }
     DBConnection.execute(query, *attribute_values)
     self.id = DBConnection.last_insert_row_id
   end

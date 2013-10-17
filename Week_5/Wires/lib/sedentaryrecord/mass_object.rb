@@ -19,7 +19,7 @@ class MassObject
       if self.class.attributes.include?(name.to_sym)
         self.send(name.to_s+"=", value)
       else
-        raise "mass assignment to unregister attribute #{name}"
+        raise "mass assignment to unregistered attribute #{name}"
       end
     end
   end
