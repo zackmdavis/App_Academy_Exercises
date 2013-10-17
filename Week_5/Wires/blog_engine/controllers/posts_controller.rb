@@ -14,4 +14,15 @@ class PostsController < ControllerBase
     render :show
   end
 
+  def new
+    render :new
+  end
+
+  def create
+    @post = Post.new(@params["post"])
+    @post.id = nil
+    @post.save
+    redirect_to("/posts")
+  end
+
 end

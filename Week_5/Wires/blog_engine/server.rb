@@ -14,13 +14,17 @@ server.mount_proc '/' do |request, response|
   router.draw do
     get Regexp.new("^/posts$"), "PostsController", :index
     get Regexp.new("^/posts/(?<id>\\d+)$"), "PostsController", :show
+    get Regexp.new("^/posts/new$"), "PostsController", :new
+    post Regexp.new("^/posts$"), "PostsController", :create
 
-    get Regexp.new("^/users$"), "UsersController", :index
-    get Regexp.new("^/users/(?<id>\\d+)$"), "UsersController", :show
+    # TODO
+    # get Regexp.new("^/users$"), "UsersController", :index
+    # get Regexp.new("^/users/(?<id>\\d+)$"), "UsersController", :show
 
-    get Regexp.new("^/signup$"), "UsersController", :new
-    get Regexp.new("^/login$"), "SessionsController", :new
-    get Regexp.new("^/logout$"), "SessionsController", :destroy
+    # TODO
+    # get Regexp.new("^/signup$"), "UsersController", :new
+    # get Regexp.new("^/login$"), "SessionsController", :new
+    # get Regexp.new("^/logout$"), "SessionsController", :destroy
   end
   route = router.run(request, response)
 end
