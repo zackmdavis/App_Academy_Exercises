@@ -5,12 +5,13 @@ require_relative '../models/post'
 class PostsController < ControllerBase
 
   def index
+    @posts = Post.all
     render :index
   end
 
   def show
     @post = Post.find(@params["id"])
-    render(:show)
+    render :show
   end
 
 end

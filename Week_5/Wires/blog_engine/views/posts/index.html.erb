@@ -1,0 +1,16 @@
+<html>
+<head><title>all posts | Ruby on Wires blog engine</title></head>
+<body>
+
+<% @posts.each do |post| %>
+
+	<h2><%= post.title %></h2>
+
+	<%= post.body %>
+
+	<p><em>posted by user#<%= post.author_id %></em></p>
+
+<% end %>
+
+</body>
+</html>
