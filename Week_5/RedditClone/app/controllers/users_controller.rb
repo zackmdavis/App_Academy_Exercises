@@ -18,7 +18,7 @@ class UsersController < ApplicationController
   end
 
   def create
-    @user = User.new(params[:user].merge(:active => false))
+    @user = User.new(params[:user])
     if params["user"]["password"] != params["confirm_password"]
       flash_error("Password confirmation doesn't match!!")
       render :new

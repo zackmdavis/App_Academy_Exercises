@@ -1,0 +1,21 @@
+<% flash.each do |type, messages| %>
+	<p>
+		<div class="flash <%= type %>">
+			<p>
+				<% messages.each do |message| %>
+					<%= message %>
+					<% end %>
+			</p>
+		</div>
+	</p>
+<% end %>
+<% user = current_user %>
+<% if user.nil? %>
+	<p>
+<%= link_to "Log in", login_url, method: :get %><br>
+<%= link_to "Sign up", new_user_url, method: :get %><br>
+	</p>
+<% else %>
+	<p>logged in as <b><%= user.username %></b></p>
+	<%= link_to "Log out", logout_url, :method => :delete %>
+<% end %>

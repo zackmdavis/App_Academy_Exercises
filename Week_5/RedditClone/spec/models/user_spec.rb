@@ -34,4 +34,8 @@ describe User do
     expect(User.find_by_credentials("JenniferUserton", "userpassword")).to eq(u)
   end
 
+  it "should has_many moderated subs" do
+    expect(have_many :moderated_subs)
+   end
+
 end

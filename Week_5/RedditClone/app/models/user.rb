@@ -6,6 +6,8 @@ class User < ActiveRecord::Base
   validates :password, :presence => true, :length => { :minimum => 6 },
             :on => :create
 
+  has_many :moderated_subs, :foreign_key => :mod_id, :class_name => "Sub"
+
   def password=(pass)
     @password = pass
     self.password_digest = BCrypt::Password.create(pass)
