@@ -1,0 +1,5 @@
+<h3>Users</h3>
+
+<% @users.each do |user| %>
+	<p><%= link_to(user.email, user_url(user.id)) %></p>
+<% end %>
