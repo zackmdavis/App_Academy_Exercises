@@ -1,6 +1,7 @@
 require_relative '../../lib/wires'
 require_relative '../../lib/sedentaryrecord'
 require_relative '../models/post'
+require_relative '../models/user'
 
 class PostsController < ControllerBase
 

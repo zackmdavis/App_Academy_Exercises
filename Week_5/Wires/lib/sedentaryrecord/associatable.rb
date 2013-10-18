@@ -53,7 +53,7 @@ module Associatable
 
     assoc_params = BelongsToAssocParams.new(name, params)
 
-    self.define_method(name) do
+    send(:define_method, name) do
       primary_key_query = %Q[SELECT #{assoc_params.foreign_key.to_s} FROM #{self.class.table_name}
                  WHERE id = ?;]
       primary_key_value = DBConnection.execute(primary_key_query, @id)[0].values[0]
@@ -69,7 +69,7 @@ module Associatable
 
     assoc_params = HasManyAssocParams.new(name, params, self.class.to_s)
 
-    self.define_method(name) do
+    send(:define_method, name) do
       primary_key_value = self.id
       query = %Q[SELECT * FROM #{assoc_params.other_table_name}
                 WHERE #{assoc_params.foreign_key.to_s} = ?]
@@ -80,7 +80,7 @@ module Associatable
   end
 
   def has_one_through(name, assoc1, assoc2)
-    self.define_method(name) do
+    send(:define_method, name) do
       self.send(assoc1.to_sym).send(assoc2.to_sym)
     end
   end
