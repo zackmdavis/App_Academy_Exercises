@@ -2,8 +2,13 @@
 
 FactoryGirl.define do
   factory :link do
-    title "MyString"
-    url Faker::Internet.url
+    sequence :title do
+      Faker::Commerce.product_name
+    end
+    sequence :url do
+      Faker::Internet.url
+    end
+    sub { FactoryGirl.create(:sub) }
     submitter { FactoryGirl.create(:user) }
   end
 end

@@ -1,0 +1,7 @@
+<p><%= comment.body %></p>
+<p class="comment-author">submitted by <%= comment.author.username %></p>
+<ul>
+<% comment.children.each do |child| %>
+	<li class="comment" id="<%= comment.id %>"><div class="comment-body"><%= render "comments/comment", :comment => child %></div></li>
+<% end %>
+</ul>

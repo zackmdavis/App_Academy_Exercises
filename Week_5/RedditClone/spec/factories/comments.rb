@@ -4,7 +4,9 @@ FactoryGirl.define do
   factory :comment do
     parent_id nil
     author { FactoryGirl.create(:user) }
-    body "Faker::Lorem.paragraph"
+    sequence :body do
+      Faker::Lorem.paragraph
+    end
     link { FactoryGirl.create(:link) }
 
     factory :child_comment do

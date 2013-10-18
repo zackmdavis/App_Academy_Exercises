@@ -2,18 +2,23 @@
 
 <form action="<%= sub_links_url %>" method="POST">
 	<input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+	<%= @sub_id %>
+
 
 	<label for="link_sub">Link Sub</label>
 	<select id="link_sub" name="link[sub_id]">
 		<% Sub.all.each do |sub| %>
-		<% selected = (sub.id == @sub_id) ? "selected" : "" %>
-			<option value="<%= sub.id %>" <%= selected %>><%= sub.name %></option>
-		<% end %>
+			<% if sub.id.to_i == @sub_id.to_i %>
+			<option value="<%= sub.id %>" selected="selected"><%= sub.name %></option>
+			<% else %>
+				<option value="<%= sub.id %>"><%= sub.name %></option>
+			<% end %>
+		<% end%>
 	</select><br>
 
-	<label for="link_title">Link Title</label><input type="text" name="link_title" value="<%= @link.title %>" name="link[title]" id="link_title"><br>
+	<label for="link_title">Link Title</label><input type="text" value="<%= @link.title %>" name="link[title]" id="link_title"><br>
 
-	<label for="link_url">Link URL</label><input type="text" name="link_url" value="<%= @link.url %>" name="link[url]" id="link_url"><br>
+	<label for="link_url">Link URL</label><input type="text" value="<%= @link.url %>" name="link[url]" id="link_url"><br>
 	<br>
 	<input type="submit" value="Create Link">
 </form>

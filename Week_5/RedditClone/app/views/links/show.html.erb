@@ -1,0 +1,29 @@
+<script type="text/javascript">
+$( document ).ready(function() {
+	var comment_form = ' \
+	<form id="comment-reply-form" action="/comments" method="post"> \
+	<textarea rows="10" cols="55" name="comment[body]" placeholder="Enter your comment here!!"></textarea> \
+	<input type="hidden" name="comment[link_id]" value="<%= @link.id %>"> \
+	<input id="comment-submit" type="submit" value="Submit Comment!!"></input> \
+	</form> \
+	'
+	$('.comment-author').append(" <a class='reply-link' href='/'>Reply</a>")
+	$('.reply-link').on('click', function(e){
+		$('#comment-reply-form').remove();
+		e.preventDefault();
+		console.log(e.target);
+		$(comment_form).appendTo($(e.target).parent());
+		var id = $(e.target).parent().parent().parent().attr('id');
+		$('#comment-reply-form').prepend(
+			"<input type='hidden' name='comment[parent_id]' value='" + id + "'>");
+	});
+});
+</script>
+
+<p>The link URL is <%= link_to @link.url, @link.url %></p>
+<p><strong>Comments&mdash;</strong></p>
+<ul>
+	<% @link.comments.where(:parent_id => nil).each do |comment| %>
+	<li class="comment" id="<%= comment.id %>"><%= render "comments/comment", :comment => comment %></li>
+	<% end %>
+</ul>

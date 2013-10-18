@@ -2,7 +2,9 @@
 
 FactoryGirl.define do
   factory :sub do
-    name "MyString"
+    sequence :name do |n|
+      Faker::Commerce.department
+    end
     mod_id 1
   end
 end

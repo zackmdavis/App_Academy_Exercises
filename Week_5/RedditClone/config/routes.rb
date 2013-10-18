@@ -10,7 +10,7 @@ RedditClone::Application.routes.draw do
     resources :links
   end
 
-
+  resources :comments
 
   root :to => "users#index"
 end
