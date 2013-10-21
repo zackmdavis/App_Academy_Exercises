@@ -61,7 +61,7 @@ var exp2 = function(base, exp) {
 
 }
 
-console.log(exp2(2,6))
+// console.log(exp2(2,6))
 
 
 var fibs = function(n) {
@@ -93,8 +93,108 @@ Array.prototype.binary_search = function(target) {
     return center + this.slice(center, this.length).binary_search(target);
   }
   else {
-    // TODO
+    return this.slice(0, center).binary_search(target);
   }
-
 }
 
+// a = [1,2,3,4,5,6,7,8,9];
+// console.log(a.binary_search(2));
+// console.log(a.binary_search(5));
+// console.log(a.binary_search(9));
+
+var change = function(n) {
+  var denominations = [25, 10, 5, 1]
+  if (n === 0) {
+    return [];
+  }
+  else {
+    for (i=0; i<5; i++) {
+      if (denominations[i] <= n) {
+        return [denominations[i]].concat(change(n-denominations[i]));
+      }
+    }
+  }
+}
+
+// console.log(change(25));
+// console.log(change(37));
+// console.log(change(216));
+
+var merge = function(left, right) {
+  merged = []
+  var target_length = right.length + left.length;
+  while (merged.length < target_length) {
+    if (left.length === 0) {
+      merged = merged.concat(right);
+    }
+
+    else if (right.length === 0) {
+      merged = merged.concat(left);
+    }
+
+    else {
+      if (left[0] < right[0]) {
+        merged.push(left.shift());
+      }
+      else {
+        merged.push(right.shift());
+      }
+    }
+
+  }
+  return merged;
+}
+
+Array.prototype.mergesort = function() {
+
+  if ((this.length === 0) || (this.length === 1)) {
+    return this;
+  }
+
+  var center = Math.floor(this.length/2);
+
+  var left = this.slice(0, center);
+  var right = this.slice(center, this.length);
+
+  left = left.mergesort();
+  right = right.mergesort();
+
+  return merge(left, right);
+}
+
+// a = [23,12,62,35,23,57]
+// console.log(a.mergesort());
+
+Array.prototype.subsets = function() {
+  if (this.length === 0) {
+    return [[]];
+  } else {
+    var z = this.slice(0, this.length-1).subsets();
+    var y = z.slice(0, z.length);
+
+    for(i=0; i<y.length; i++){
+      y[i] = y[i].concat([this[this.length-1]])
+    }
+
+    return z.concat(y);
+  }
+};
+
+Array.prototype.subsets_redux = function() {
+  if (this.length === 0) {
+    return [[]];
+  }
+  else {
+    var subproblem = this.slice(0, this.length-1).subsets();
+    var subs = [];
+
+    for (var i = 0; i < subproblem.length; i++) {
+      subs.push(subproblem[i]);
+      subs.push(subproblem[i].concat([this[this.length-1]]));
+    }
+    return subs;
+  }
+};
+
+a = [1,2,3,4,5];
+console.log(a.subsets_redux());
