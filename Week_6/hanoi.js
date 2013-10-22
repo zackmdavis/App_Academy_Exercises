@@ -1,37 +1,62 @@
-// (function (root) {
-//   var Hanoi = root.Hanoi = (root.Hanoi || {});
-//   .
-//   .
-//   .
-// })(this);
+(function(root) {
 
-function Pegs() {
-  this.pegs = [[3, 2, 1], [], []];
-}
+  var readline = require('readline');
+  var reader = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
 
-Pegs.prototype.at = function(idx) {
-  return this.pegs[idx];
-}
+  function Pegs() {
+    this.pegs = [[3, 2, 1], [], []];
+  }
 
-Pegs.prototype.top_disc = function (idx) {
-  if (this.at(idx).length === 0) return 0;
-  else return this.at(idx)[this.at(idx).length];
-}
+  Pegs.prototype.at = function(idx) {
+    return this.pegs[idx];
+  }
 
-Pegs.prototype.move = function(from, to) {
-  this.at(to).push(this.at(from).pop());
-}
+  Pegs.prototype.top_disc = function (idx) {
+    if (this.at(idx).length === 0) return 1/0; // "infinity"
+    else return this.at(idx)[this.at(idx).length-1];
+  }
 
-Pegs.prototype.legalMove = function(from, to) {
-  return this.top_disc(from) < this.top_disc(to);
-}
+  Pegs.prototype.move = function(from, to) {
+    if (this.legalMove(from, to)) {
+      this.at(to).push(this.at(from).pop());
+    } else {
+      console.log("You cannot do that");
+    }
+  }
 
-our_pegs = new Pegs();
-our_pegs.move(0,1)
-our_pegs.move(0,2)
-console.log(our_pegs)
+  Pegs.prototype.legalMove = function(from, to) {
+    return (this.top_disc(from) < this.top_disc(to));
+  }
 
-// function Game() {
-//
-//
-// }
+  function Game() {
+    this.pegs = new Pegs();
+    this.askForMove();
+  }
+
+  Game.prototype.askForMove = function () {
+    that = this;
+    reader.question("Enter a move like (from,to)", function(input){
+      var inputs = input.split(',');
+      var from = parseInt(inputs[0]);
+      var to = parseInt(inputs[1]);
+      that.pegs.move(from, to);
+      console.log(that.pegs);
+      if (that.isWon()) console.log("A WINNER")
+      else that.askForMove();
+    })
+  }
+
+  Game.prototype.isWon = function () {
+    var win_pegs = [3,2,1].toString()
+    var last_pegs = this.pegs.at(2).toString()
+    return win_pegs == last_pegs;
+  }
+
+  our_game = new Game();
+
+})(this);
+
+
