@@ -83,6 +83,7 @@ Board.prototype.flipPiecesBetween = function(pos1, pos2) {
 
 Board.prototype.placePiece = function(position, color) {
   this.board[position.row][position.col] = new Piece(color);
+  var flipped = false;
   var directions = [new Position(1,0), new Position(-1,0), new Position(0,1), new Position(0,-1)];
   for(var d = 0; d < 4; d++){
     var tracking = position.dup();
@@ -95,17 +96,47 @@ Board.prototype.placePiece = function(position, color) {
     if (this.at(tracking).color == color){
       console.log("I'm in your piece loop, flipping pieces; faithfully yours, console log")
       this.flipPiecesBetween(position, tracking);
+      flipped = true;
     }
   }
-  this.setAt(position, color);
+  if (flipped) {
+    this.setAt(position, color)
+    return true}
+  else return false;
 }
 
+function Game() {
+  this.board = new Board();
+  this.current_color = "B";
+}
+
+var readline = require('readline');
+var reader = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+
+Game.prototype.askForMove = function() {
+  that = this;
+  that.board.display();
+  reader.question("Enter a move like (row,col)", function(input) {
+    inputs = input.split(',');
+    row = parseInt(inputs[0]);
+    col = parseInt(inputs[1]);
+    if (that.board.placePiece(new Position(row,col), that.current_color))
+        that.current_color = (that.current_color == 'W') ? 'B' : 'W';
+    that.askForMove();
+  });
+}
 
 b = new Board();
+g = new Game();
+g.askForMove();
+//
+// b.placePiece(new Position(2,3), "B")
+// b.placePiece(new Position(1,3), "W")
+// b.placePiece(new Position(5,3), "W")
+// b.placePiece(new Position(3,2), "B")
+//
+// b.display();
 
-b.placePiece(new Position(2,3), "B")
-b.placePiece(new Position(1,3), "W")
-b.placePiece(new Position(5,3), "W")
-b.placePiece(new Position(3,2), "B")
-
-b.display();
