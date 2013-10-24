@@ -1,0 +1,31 @@
+.disc1{
+  width: 90px;
+  height: 20px;
+  background-color: black;
+  margin: 0 auto;
+  margin-bottom: 10px;
+  float: center;
+}
+
+.disc2{
+  width: 150px;
+  height: 20px;
+  background-color: black;
+  margin: 0 auto;
+  margin-bottom: 10px;
+  float: center;
+}
+
+.disc3 {
+  width: 250px;
+  height: 20px;
+  background-color: black;
+  margin: 0 auto;
+  float: center;
+}
+
+.peg {
+  width: 30%;
+  height: 100px;
+  float: left;
+}
