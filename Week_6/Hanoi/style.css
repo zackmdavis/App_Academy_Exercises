@@ -1,10 +1,21 @@
-.disc1{
+.spacer {
+  width: 90px;
+  height: 20px;
+  background-color: white;
+  margin: 0 auto;
+  margin-bottom: 10px;
+  float: center;
+  bottom: 0;
+}
+
+.disc1 {
   width: 90px;
   height: 20px;
   background-color: black;
   margin: 0 auto;
   margin-bottom: 10px;
   float: center;
+  bottom: 0;
 }
 
 .disc2{
@@ -14,18 +25,26 @@
   margin: 0 auto;
   margin-bottom: 10px;
   float: center;
+  bottom: 0;
 }
 
 .disc3 {
   width: 250px;
   height: 20px;
   background-color: black;
-  margin: 0 auto;
+   margin: 0 auto;
   float: center;
+  margin-bottom: 10px;
 }
 
 .peg {
-  width: 30%;
-  height: 100px;
+  width: 33.33%;
+  height: 96px;
   float: left;
 }
+
+#message {
+  position: relative;
+  bottom: 0px;
+}
+
