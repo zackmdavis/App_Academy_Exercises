@@ -14,7 +14,7 @@ MovingObject.prototype.move = function(delta){
 }
 
 MovingObject.prototype.draw = function(ctx){
-  ctx.fillStyle = "black";
+  ctx.fillStyle = this.color;
   ctx.beginPath();
 
   ctx.arc(
