@@ -1,0 +1,9 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  in_friend_id: 1
+  out_friend_id: 1
+
+two:
+  in_friend_id: 1
+  out_friend_id: 1
