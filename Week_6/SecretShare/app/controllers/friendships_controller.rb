@@ -1,6 +1,7 @@
 class FriendshipsController < ApplicationController
 
   def create
+    sleep(2)
     @friendship = Friendship.new({:in_friend_id => current_user.id, :out_friend_id => params[:user_id]})
     if @friendship.save
       render :json => @friendship
@@ -10,10 +11,11 @@ class FriendshipsController < ApplicationController
   end
 
   def destroy
-    @friendship = Friendship.find(params[:id])
+
+    @friendship = Friendship.find_by_in_friend_id_and_out_friend_id(current_user.id, params[:out_friend_id])
     if @friendship
       @friendship.destroy
-      render :json => "destroyed successfully"
+      render :json => {:message => "Success"}
     else
       render :json => "ERROR - friendship not found"
     end

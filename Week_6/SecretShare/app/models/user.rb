@@ -9,6 +9,24 @@ class User < ActiveRecord::Base
   )
 
   has_many(
+  :outgoing_friendships,
+  :class_name => "Friendship",
+  :foreign_key => :in_friend_id
+  )
+
+  belongs_to(
+  :incoming_friendships,
+  :class_name => "Friendship",
+  :foreign_key => :out_friend_id
+  )
+
+  # has_many(
+  # :friends,
+  # through: :outgoing_friendships,
+  # source: :out_friend_id
+  # )
+
+  has_many(
     :received_secrets,
     :class_name => "Secret",
     :foreign_key => :recipient_id
@@ -20,6 +38,21 @@ class User < ActiveRecord::Base
   validates :username, :presence => true
 
   after_initialize :ensure_session_token
+
+  def can_friend?(out_friend_id)
+    ourself = self.id == out_friend_id;
+    exists = Friendship.exists?({:in_friend_id => self.id,
+                          :out_friend_id => out_friend_id })
+
+    return false if (ourself or exists)
+    true
+  end
+
+
+  def can_unfriend?(out_friend_id)
+    Friendship.exists?({:in_friend_id => self.id,
+                        :out_friend_id => out_friend_id })
+  end
 
   def self.find_by_credentials(username, password)
     user = User.find_by_username(username)

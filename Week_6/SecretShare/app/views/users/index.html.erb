@@ -2,9 +2,46 @@
 <% @users.each do |user|%>
 <li>
   <h4><%=user.username%></h4>
-    <%if Friendship.can_friend?(current_user.id, user.id)%>
-    <%= render 'friendships/form', :locals => {:user_id => user.id } %>
+    <%if current_user.can_friend?(user.id)%>
+      <%= button_to "Add Friend!", user_friendships_url(user), :form_class => "friend-button", :data => {:user_id => user.id} %>
+    <% elsif current_user.can_unfriend?(user.id) %>
+      <%= button_to "Unfriend!", "/friendships/#{user.id}", :form_class => "unfriend-button", :method => :delete, :data => {:user_id => user.id} %>
     <%end%>
 </li>
 <% end %>
 </ul>
+
+<script>
+  $('.unfriend-button').on("click", function (event) {
+    event.preventDefault();
+    var user_id = $(event.target).data('user-id');
+    var unfriend_button = $('[data-user-id=' + user_id + ']')
+    unfriend_button.attr('disabled', 'disabled')
+    unfriend_button.attr('value', 'unfriending :\'(')
+    $.ajax({
+      url: "/friendships/" + user_id,
+      type: "DELETE",
+      success: function (responseJson) {
+        unfriend_button.remove();
+        console.log(responseJson);
+      }
+    });
+  });
+
+  $('.friend-button').on("click", function (event) {
+    event.preventDefault();
+    var user_id = $(event.target).data('user-id');
+    var friend_button = $('[data-user-id=' + user_id + ']')
+    friend_button.attr('disabled', 'disabled')
+    friend_button.attr('value', 'friending ...')
+    $.ajax({
+      url: "/users/" + user_id + "/friendships",
+      type: "POST",
+      success: function (friendshipJSON) {
+        friend_button.remove();
+        //$('[data-user-id=' + friendshipJSON.out_friend_id + ']').remove();
+        console.log("issued id: " + friendshipJSON.id);
+      }
+    });
+  });
+</script>
