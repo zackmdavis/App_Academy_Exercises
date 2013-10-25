@@ -1,0 +1,31 @@
+.row {
+  height: 20px;
+  padding: 2px;
+  width: 682px;
+  background-color:black;
+}
+
+.square {
+  width: 20px;
+  height: 20px;
+  margin: 1px;
+  background-color: green;
+  float: left;
+}
+
+.snake {
+  width: 20px;
+  height: 20px;
+  margin: 1px;
+  background-color: #AABB29;
+  float: left;
+}
+
+
+.mouse {
+  width: 20px;
+  height: 20px;
+  margin: 1px;
+  background-color: #DDDFED;
+  float: left;
+}
