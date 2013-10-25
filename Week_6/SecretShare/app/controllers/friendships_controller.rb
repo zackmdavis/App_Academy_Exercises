@@ -1,7 +1,6 @@
 class FriendshipsController < ApplicationController
 
   def create
-    sleep(2)
     @friendship = Friendship.new({:in_friend_id => current_user.id, :out_friend_id => params[:user_id]})
     if @friendship.save
       render :json => @friendship

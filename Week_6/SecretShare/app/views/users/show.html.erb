@@ -6,3 +6,20 @@
     <li><%= secret.title %></li>
   <% end %>
 </ul>
+
+<%=render 'shared/secret_form', locals: {recipient_id: params[:id]}%>
+
+<script>
+
+$('#submit-secret').on("click", function(event){
+  event.preventDefault();
+  $.ajax(
+    url: "/secrets",
+    type: "POST",
+    data: $('#secret-form').serializeJSON(),
+    success: function() {
+      event.target.reset();
+    })
+  })
+
+</script>
