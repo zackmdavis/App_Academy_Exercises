@@ -1,7 +1,7 @@
 <h1><%= @user.username %></h1>
 
 <h2>Secrets</h2>
-<ul>
+<ul id="secret-list">
   <% @user.received_secrets.each do |secret| %>
     <li><%= secret.title %></li>
   <% end %>
@@ -11,15 +11,16 @@
 
 <script>
 
-$('#submit-secret').on("click", function(event){
-  event.preventDefault();
-  $.ajax(
-    url: "/secrets",
-    type: "POST",
-    data: $('#secret-form').serializeJSON(),
-    success: function() {
-      event.target.reset();
-    })
-  })
+$("#submit-secret").on("click", function(event){
+   event.preventDefault();
+   $.ajax({
+     url: "/secrets",
+     type: 'POST',
+     data: $('#secret-form').serializeJSON(),
+     success: function(newSecret) {
+       $('#secret-form')[0].reset();
+       $('#secret-list').prepend('<li>'+newSecret['title']+'</li>')
+     }});
+ });
 
 </script>
