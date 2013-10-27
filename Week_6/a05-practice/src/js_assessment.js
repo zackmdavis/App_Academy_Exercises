@@ -77,7 +77,20 @@ Assessment.primes = function (n) {
 };
 
 Function.prototype.myCall = function (context, argArray) {
-    // actually not quite sure what to do here
+   // Let's review.
+
+   // func.bind(context[, arg1, &c.]) returns a new function just like
+   // func except that, when called, has its "this" set to context
+
+   // func.call(context[, arg1, &c.]) calls func with "this" set to
+   // context
+
+   // func.apply(context[, args]) is like call but with an args array
+   // instead of individual args
+
+   // So to make our own version of call, we return the return value of
+   // calling bind with the desired context.
+    return this.bind(context, argArray)();
 };
 
 Function.prototype.inherits = function (Parent) {

@@ -1,9 +1,11 @@
 // WakeboardGame module
 
-// for some reason SpecRunner.html can't find my code here; what am I
-// doing wrong??
+// Okay, it's like this---
 (function(root){
-    var WakeboardGame = root.WakeboardGame = function() {};
+
+    // We're defining a blank _object_ in the global namespace, and
+    // then monkeypatching functions into it
+    var WakeboardGame = root.WakeboardGame = (root.WakeboardGame || {});
 
     var Boat = WakeboardGame.Boat = function(sponsor) {
 	this.sponsor = sponsor;
@@ -13,8 +15,7 @@
     Boat.prototype.turn = function() {return "turn";}
     Boat.prototype.sink = function() {return "sink";}
     
-    
-    var Wakeboarder = WakeboardGame.Wakeboarder(name, sponsor) {
+    var Wakeboarder = WakeboardGame.Wakeboarder = function(name, sponsor) {
 	this.name = name;
 	this.sponsor = sponsor;
     };
