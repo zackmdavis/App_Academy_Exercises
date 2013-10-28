@@ -1,6 +1,6 @@
 class Api::PhotosController < ApplicationController
   def index
-    @photos = Photo.find_by_owner_id(params[:user_id])
+    @photos = Photo.find_all_by_owner_id(params[:user_id])
 
     respond_to do |format|
       format.html
@@ -10,8 +10,9 @@ class Api::PhotosController < ApplicationController
   end
 
   def create
-    @photo = Photo.new(params[:photo]);
-
+    puts params
+    @photo = Photo.new({:owner_id => params[:owner_id], :title => params[:title],
+                        :url => params[:url] })
     if @photo.save
       render :json => @photo
     else

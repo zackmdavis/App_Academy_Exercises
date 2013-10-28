@@ -17,8 +17,22 @@
 
 (function(root){
 
-  var Photo = root.photo = function(attributes) {
+  var Photo = root.Photo = function(attributes) {
     this.attributes = attributes
+  }
+
+  Photo.all = [];
+
+  Photo.ensure_in_all = function(photo) {
+    var included = false;
+    for(var i = 0; i < Photo.all.length; i++) {
+      if(Photo.all[i].attributes.id === photo.attributes.id) {
+        included = true;
+      }
+    }
+    if(!included) {
+      Photo.all.push(photo);
+    }
   }
 
   Photo.prototype.get = function(attr_name) {
@@ -34,16 +48,33 @@
   }
 
   Photo.prototype.create = function(callback) {
+    var that = this;
     $.ajax({
       type: "POST",
       url: "/api/photos",
-      data: this.attributes,
-      success: callback
+      data: that.attributes,
+      success: function(response) {
+        callback(response);
+        _.extend(that.attributes, response);
+        Photo.ensure_in_all(that);
+      }
     })
   }
 
-  Photo.prototype.fetchByUserId = function(userId, callback) {
-    // TODO
+  Photo.fetchByUserId = function(userId, callback) {
+    var photos = [];
+    $.ajax({
+      type: "GET",
+      url: "/api/users/" + userId + "/photos",
+      success: function(response) {
+        response.forEach(function(photoJson) {
+          var photo = new Photo(photoJson);
+          photos.push(photo);
+          Photo.ensure_in_all(photo);
+        })
+        callback(photos);
+      }
+    });
   }
 
 })(this);
