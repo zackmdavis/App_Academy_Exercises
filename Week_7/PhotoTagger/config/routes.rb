@@ -12,5 +12,5 @@ NewAuthDemo::Application.routes.draw do
     resources :photo_taggings, :only => [:create]
   end
 
-  root :to => "users#show"
+  root :to => "static_pages#root"
 end
