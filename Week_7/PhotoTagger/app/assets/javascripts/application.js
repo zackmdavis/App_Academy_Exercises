@@ -10,20 +10,29 @@
 // WARNING: THE FIRST BLANK LINE MARKS THE END OF WHAT'S TO BE PROCESSED, ANY BLANK LINE SHOULD
 // GO AFTER THE REQUIRES BELOW.
 //
+
 //= require underscore
 //= require jquery
 //= require jquery_ujs
+//= require_tree ../templates
 //= require_tree .
 //= require_tree ./models
 //= require_tree ./views
 
 
-var initialize = function(user_id) {
-  var userView = new PhotosListView();;
-  var rendered = "";
-  Photo.fetchByUserId(user_id, function() {
-    rendered = userView.render();
-  });
-  $('#content').append(rendered.$el);
 
+
+
+var initialize = function(user_id) {
+  // var userView = new PhotosListView();
+  // var rendered = "";
+  // Photo.fetchByUserId(user_id, function() {
+  //   rendered = userView.render();
+  // });
+  // $('#content').append(rendered.$el);
+
+  var photoForm = new PhotoFormView();
+  var renderedForm = photoForm.render();
+  $('#form').append(renderedForm.$el.html());
 }
+
