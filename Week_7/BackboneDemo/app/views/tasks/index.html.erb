@@ -1,0 +1,10 @@
+<script type="application/json" id="bootstrapped_tasks_json">
+  <%= Task.all.to_json.html_safe %>
+</script>
+
+<script type="application/javascript">
+  $(function () {
+    var tasks = JSON.parse($("#bootstrapped_tasks_json").html());
+    window.TD.initialize($("body"), tasks);
+  });
+</script>
