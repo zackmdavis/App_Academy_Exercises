@@ -40,6 +40,10 @@
         callback(response);
         _.extend(that.attributes, response);
         Photo.ensure_in_all(that);
+        Photo.trigger("add");
+      },
+      error: function(response) {
+        console.log(response);
       }
     })
   }
@@ -59,5 +63,25 @@
       }
     });
   }
+
+
+    Photo._events = {};
+
+    Photo.on = function(eventName, callback) {
+      if(!Photo._events[eventName]) {
+        Photo._events[eventName] = [];
+      }
+      Photo._events[eventName].push(callback);
+    }
+
+    Photo.trigger = function(eventName) {
+      if(!Photo._events[eventName]) {
+        Photo._events[eventName] = [];
+      }
+      Photo._events[eventName].forEach(function(callback){
+        callback();
+      })
+    }
+
 
 })(this);

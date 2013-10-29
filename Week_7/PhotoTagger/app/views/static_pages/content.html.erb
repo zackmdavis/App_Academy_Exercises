@@ -1,6 +1,7 @@
 <script>
 $(document).ready(function(){
-  initialize(<%= current_user.id %>);
+  CURRENT_USER_ID = <%= current_user.id %>
+  initialize(CURRENT_USER_ID);
 })</script>
 <div id="content"></div>
-<div id="form"></div>
+<div id="form-holder"></div>

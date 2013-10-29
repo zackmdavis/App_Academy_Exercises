@@ -14,25 +14,26 @@
 //= require underscore
 //= require jquery
 //= require jquery_ujs
+//= require jquery.serializeJSON.min
 //= require_tree ../templates
-//= require_tree .
 //= require_tree ./models
 //= require_tree ./views
-
+//= require_tree .
 
 
 
 
 var initialize = function(user_id) {
-  // var userView = new PhotosListView();
-  // var rendered = "";
-  // Photo.fetchByUserId(user_id, function() {
-  //   rendered = userView.render();
-  // });
-  // $('#content').append(rendered.$el);
+  var userView = new PhotosListView();
+  var rendered = "";
+  Photo.fetchByUserId(user_id, function() {
+    rendered = userView.render();
+  });
+  $('#content').html(rendered.$el);
 
   var photoForm = new PhotoFormView();
   var renderedForm = photoForm.render();
-  $('#form').append(renderedForm.$el.html());
+
+  $('#form-holder').html(renderedForm.$el.html());
 }
 
