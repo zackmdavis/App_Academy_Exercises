@@ -1,4 +1,6 @@
 BackboneJournal.Routers.PostsRouter = Backbone.Router.extend({
+
+
   initialize: function($root, posts) {
     this.$root = $root;
     this.posts = posts;
@@ -13,7 +15,7 @@ BackboneJournal.Routers.PostsRouter = Backbone.Router.extend({
     var that = this;
 
     var postsIndexView = new BackboneJournal.Views.PostsIndexView({
-      collection: that.posts;
+      collection: that.posts
     })
 
     that.$root.html(postsIndexView.render().$el);
@@ -21,12 +23,11 @@ BackboneJournal.Routers.PostsRouter = Backbone.Router.extend({
 
   show: function(post_id) {
     var that = this;
-
     var postShowView = new BackboneJournal.Views.PostShowView({
-      model: that.posts.findWhere({id: post_id});
+      model: that.posts.findWhere({id: parseInt(post_id)})
     })
 
     that.$root.html(postShowView.render().$el);
-  },
+  }
 
 })

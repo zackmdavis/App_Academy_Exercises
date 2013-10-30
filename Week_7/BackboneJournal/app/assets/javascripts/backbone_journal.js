@@ -14,7 +14,9 @@ window.BackboneJournal = {
     postIndexView.listenTo(posts, "reset", postIndexView.render);
     $root.html(postIndexView.render().$el);
 
-    globalIndexView = postIndexView;
+    new BackboneJournal.Routers.PostsRouter($root, posts);
+    Backbone.history.start();
+
   }
 };
 
