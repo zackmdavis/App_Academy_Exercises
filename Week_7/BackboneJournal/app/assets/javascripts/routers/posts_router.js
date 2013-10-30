@@ -1,7 +1,8 @@
 BackboneJournal.Routers.PostsRouter = Backbone.Router.extend({
 
-  initialize: function($root, posts) {
+  initialize: function($root, $sidebar, posts) {
     this.$root = $root;
+    this.$sidebar = $sidebar;
     this.posts = posts;
   },
 
@@ -18,7 +19,7 @@ BackboneJournal.Routers.PostsRouter = Backbone.Router.extend({
       collection: that.posts
     })
 
-    that.$root.html(postsIndexView.render().$el);
+    that.$sidebar.html(postsIndexView.render().$el);
   },
 
 

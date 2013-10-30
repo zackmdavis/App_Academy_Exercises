@@ -3,13 +3,13 @@ window.BackboneJournal = {
   Collections: {},
   Views: {},
   Routers: {},
-  initialize: function($root, posts) {
+  initialize: function($root, $sidebar, posts) {
     var postIndexView = new BackboneJournal.Views.PostsIndexView({
       collection: posts
     });
-    $root.html(postIndexView.render().$el);
+    $sidebar.html(postIndexView.render().$el);
 
-    new BackboneJournal.Routers.PostsRouter($root, posts);
+    new BackboneJournal.Routers.PostsRouter($root, $sidebar, posts);
     Backbone.history.start();
 
   }
@@ -21,7 +21,7 @@ $(document).ready(function(){
     url: "/posts.json",
     success: function(postsJson) {
       var thePosts = new BackboneJournal.Collections.Posts(postsJson);
-      BackboneJournal.initialize($('#index-content'), thePosts);
+      BackboneJournal.initialize($('#content'), $('#sidebar'), thePosts);
     }
   })
 });
