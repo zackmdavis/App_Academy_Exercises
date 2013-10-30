@@ -25,7 +25,7 @@ $(document).ready(function(){
     type: "GET",
     url: "/posts.json",
     success: function(postsJson) {
-      var thePosts = new BackboneJournal.Posts(postsJson);
+      var thePosts = new BackboneJournal.Collections.Posts(postsJson);
       BackboneJournal.initialize($('#index-content'), thePosts);
     }
   })

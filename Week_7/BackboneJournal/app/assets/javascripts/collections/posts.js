@@ -1,4 +1,4 @@
-window.BackboneJournal.Posts = Backbone.Collection.extend({
-  model: BackboneJournal.Post,
+window.BackboneJournal.Collections.Posts = Backbone.Collection.extend({
+  model: BackboneJournal.Models.Post,
   url: "/posts"
 })

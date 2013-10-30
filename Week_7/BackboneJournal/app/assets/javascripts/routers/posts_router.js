@@ -1,6 +1,5 @@
 BackboneJournal.Routers.PostsRouter = Backbone.Router.extend({
 
-
   initialize: function($root, posts) {
     this.$root = $root;
     this.posts = posts;
@@ -8,6 +7,7 @@ BackboneJournal.Routers.PostsRouter = Backbone.Router.extend({
 
   routes: {
     "": "index",
+    "new": "newPost",
     ":id": "show"
   },
 
@@ -19,6 +19,20 @@ BackboneJournal.Routers.PostsRouter = Backbone.Router.extend({
     })
 
     that.$root.html(postsIndexView.render().$el);
+  },
+
+
+  newPost: function() {
+    var that = this;
+
+    var newPost = new BackboneJournal.Models.Post();
+    var newPostView = new BackboneJournal.Views.NewPostView({
+      model: newPost,
+      collection: that.posts
+    });
+
+
+    that.$root.html(newPostView.render().$el);
   },
 
   show: function(post_id) {

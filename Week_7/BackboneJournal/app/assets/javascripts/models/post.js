@@ -1,3 +1,3 @@
-window.BackboneJournal.Post = Backbone.Model.extend({
+window.BackboneJournal.Models.Post = Backbone.Model.extend({
 
 })
