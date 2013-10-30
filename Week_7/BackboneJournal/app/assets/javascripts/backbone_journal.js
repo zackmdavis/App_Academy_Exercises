@@ -13,6 +13,8 @@ window.BackboneJournal = {
     postIndexView.listenTo(posts, "change:title", postIndexView.render);
     postIndexView.listenTo(posts, "reset", postIndexView.render);
     $root.html(postIndexView.render().$el);
+
+    globalIndexView = postIndexView;
   }
 };
 
