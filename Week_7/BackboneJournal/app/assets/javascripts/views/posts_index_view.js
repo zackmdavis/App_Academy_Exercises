@@ -1,5 +1,12 @@
 BackboneJournal.Views.PostsIndexView = Backbone.View.extend({
 
+  initialize: function() {
+    this.listenTo(this.collection, "add", this.render);
+    this.listenTo(this.collection, "remove", this.render);
+    this.listenTo(this.collection, "change:title", this.render);
+    this.listenTo(this.collection, "reset", this.render);
+  },
+
   render: function() {
     var ul = $('<ul></ul>');
     _(this.collection.models).each(function (post) {

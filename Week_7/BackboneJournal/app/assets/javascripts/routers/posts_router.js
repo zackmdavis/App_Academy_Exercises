@@ -27,7 +27,6 @@ BackboneJournal.Routers.PostsRouter = Backbone.Router.extend({
 
     var newPost = new BackboneJournal.Models.Post();
     var newPostView = new BackboneJournal.Views.NewPostView({
-      model: newPost,
       collection: that.posts
     });
 
