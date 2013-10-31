@@ -7,6 +7,8 @@ class User < ActiveRecord::Base
   validates :session_token, :presence => true
   validates :username, :presence => true
 
+  has_many :pastes, :foreign_key => :owner_id
+
   after_initialize :ensure_session_token
 
   def self.find_by_credentials(username, password)

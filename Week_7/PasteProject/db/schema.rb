@@ -11,7 +11,17 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130814223245) do
+ActiveRecord::Schema.define(:version => 20131031173027) do
+
+  create_table "pastes", :force => true do |t|
+    t.string   "title"
+    t.integer  "owner_id"
+    t.text     "body"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
+  add_index "pastes", ["owner_id"], :name => "index_pastes_on_owner_id"
 
   create_table "users", :force => true do |t|
     t.string   "username",        :null => false
