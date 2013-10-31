@@ -14,12 +14,12 @@ BackboneJournal.Views.NewPostView = Backbone.View.extend({
     var that = this;
     event.preventDefault();
 
-    var formTitle = $("#title").val();
-    var formBody = $("#body").val();
+    var formTitle = $("#title-field").val();
+    var formBody = $("#body-field").val();
 
     var newPost = new BackboneJournal.Models.Post({title: formTitle, body: formBody});
     this.collection.create(newPost);
-    Backbone.history.navigate('/', {trigger: true});
+    Backbone.history.navigate('', {trigger: true});
   }
 
 

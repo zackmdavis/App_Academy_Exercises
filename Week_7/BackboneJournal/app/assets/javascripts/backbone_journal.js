@@ -12,6 +12,7 @@ window.BackboneJournal = {
     new BackboneJournal.Routers.PostsRouter($root, $sidebar, posts);
     Backbone.history.start();
 
+    $('#headline').on("click", function() { alert("You clicked the headline!"); })
   }
 };
 
