@@ -5,7 +5,6 @@ window.PasteProject = {
   Routers: {},
   initialize: function() {
     PasteProject.pastes = new PasteProject.Collections.Pastes();
-    console.log("test");
     new PasteProject.Routers.Pastes({
       "$root": $("#content")
     });

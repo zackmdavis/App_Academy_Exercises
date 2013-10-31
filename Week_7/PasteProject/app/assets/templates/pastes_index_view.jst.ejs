@@ -1,6 +1,4 @@
-<h1>My Pastes</h1>
-<ul>
-<% pastes.each(function(paste) { %>
-  <li><%= paste.get('title') %></li>
+<h2>My Pastes</h2>
+<% pastePartials.forEach(function(partial) { %>
+  <%= partial %>
 <% });%>
-</ul>

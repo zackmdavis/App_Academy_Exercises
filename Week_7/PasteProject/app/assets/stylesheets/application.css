@@ -11,3 +11,30 @@
  *= require_self
  *= require_tree .
  */
+
+
+h1 {
+font-family: 'Fredericka the Great', cursive;
+font-size: 345%;
+float: left;
+margin-right: 1cm;
+color: #AA2299;
+}
+
+.paste-title {
+  font-family: 'Fredericka the Great', cursive;
+  font-size: 160%;
+  color: #207070;
+}
+
+.paste-body {
+  background-color: white;
+}
+
+.favorite-button {
+  background-color: #99FF99;
+}
+
+.user-bar {
+  background-color: #FFFF99;
+}
