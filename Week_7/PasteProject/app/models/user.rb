@@ -8,6 +8,7 @@ class User < ActiveRecord::Base
   validates :username, :presence => true
 
   has_many :pastes, :foreign_key => :owner_id
+  has_many :favorites
 
   after_initialize :ensure_session_token
 
