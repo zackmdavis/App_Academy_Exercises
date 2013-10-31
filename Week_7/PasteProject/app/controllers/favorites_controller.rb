@@ -1,5 +1,6 @@
 class FavoritesController < ApplicationController
   def create
+    sleep 2
     @favorite = Favorite.new(params[:favorite])
 
     if @favorite.save

@@ -2,5 +2,7 @@
 
 <div class="paste-body" data-id="<%= paste.get('id')%>" ><%= paste.get('body')%>
   <br>
-  <button  data-id="<%= paste.get('id')%>" class="favorite-button" >Favorite</button>
+  <% if(!paste.favorite()[0]) {%>
+  <button id="favorite-button-<%= paste.get('id')%>" data-id="<%= paste.get('id')%>" class="favorite-button" >Favorite</button>
+  <% } %>
 </div>

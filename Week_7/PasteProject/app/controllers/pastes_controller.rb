@@ -1,8 +1,8 @@
 class PastesController < ApplicationController
 
   def index
-    @pastes = Paste.find_all_by_owner_id(current_user)
-    render :json => @pastes
+    @pastes = Paste.includes(:favorite).find_all_by_owner_id(current_user)
+    render :json => @pastes, :include => :favorite
   end
 
   def show

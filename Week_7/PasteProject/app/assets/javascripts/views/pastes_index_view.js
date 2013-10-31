@@ -27,12 +27,16 @@ PasteProject.Views.PastesIndexView = Backbone.View.extend({
 
   makeFavorite: function(event) {
     var clicked = $(event.currentTarget);
-    clicked.text("Unfavorite");
     var paste_id = clicked.data("id");
     var paste = this.collection.findWhere({id: paste_id});
     var favorite = new PasteProject.Models.Favorite({});
+    $('#favorite-button-' + paste.id).text("processing ...");
     favorite.set({ paste_id: paste.id, user_id: paste.attributes.owner_id });
-    favorite.save();
+    favorite.save({}, {
+      success: function() {
+        $('#favorite-button-' + paste.id).remove();
+      }
+    });
   },
 
 });
