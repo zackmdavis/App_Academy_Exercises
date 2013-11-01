@@ -10,4 +10,13 @@ class PastesController < ApplicationController
     render :json => @paste
   end
 
+  def create
+    @paste = Paste.new(params[:paste])
+    @paste[:owner_id] = current_user.id
+    if @paste.save
+      render :json => @paste
+    else
+      render :json => @paste.errors.full_messages, status: 422
+    end
+  end
 end

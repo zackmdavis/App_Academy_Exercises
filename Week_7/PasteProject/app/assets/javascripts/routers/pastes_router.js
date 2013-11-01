@@ -5,7 +5,8 @@ PasteProject.Routers.Pastes = Backbone.Router.extend({
   },
 
   routes: {
-    "": "index"
+    "": "index",
+    "new": "new"
   },
 
   index: function() {
@@ -20,6 +21,10 @@ PasteProject.Routers.Pastes = Backbone.Router.extend({
         that.$root.html(pastesIndexView.render().$el);
       }
     })
-  }
+  },
 
+  new: function () {
+    var pasteFormView = new PasteProject.Views.PasteFormView({});
+    this.$root.html(pasteFormView.render().$el);
+  },
 })
