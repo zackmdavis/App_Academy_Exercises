@@ -1,0 +1,10 @@
+<a href="#">(&larr; <em>back to feed list)</em></a>
+
+<ul>
+<% for (var i = 0; i < Object.keys(feed.attributes).length-1; i++) { %>
+  <li><%= feed.attributes[i].title %></li>
+<% } %>
+</ul>
+
+
+
