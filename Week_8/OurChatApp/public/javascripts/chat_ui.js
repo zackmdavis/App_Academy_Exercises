@@ -9,12 +9,11 @@
   }
 
   var displayMessage = Chat.displayMessage = function(message) {
-    debugger
     $('#messages').append(message + "<br>");
   }
 
   $(document).ready(function(){
-    var ourSocket = io.connect("http://localhost:8080");
+    var ourSocket = io.connect("http://10.0.1.21:8080");
     ourSocket.on("message", displayMessage);
     var ourChatSocket = new Chat.chatSocket(ourSocket);
 
