@@ -2,12 +2,15 @@ var http = require('http');
 var fs = require('fs');
 var path = require('path');
 var mime = require('mime');
+var chat_server = require('./lib/chat_server.js')
 // var router = require('./router.js');
 
-http.createServer(function (request, response) {
+var server = http.createServer(function (request, response) {
   var router = new Router(request, response);
   router.process();
 }).listen(8080);
+
+chat_server(server);
 
 
 var Router = function(req, res){
@@ -26,7 +29,11 @@ Router.prototype.process = function(){
       console.log(router.res.statusCode);
       router.res.end();
     } else {
-      router.res.writeHead(200, {'Content-Type': 'text/html'});
+      if (path.slice(-2) === 'js' ){
+        router.res.writeHead(200, {'Content-Type': 'text/javascript'});
+      } else {
+        router.res.writeHead(200, {'Content-Type': 'text/html'});
+      }
       router.res.write(data);
       router.res.end();
     }
@@ -35,7 +42,7 @@ Router.prototype.process = function(){
   if (path === '/'){
     fs.readFile('public/index.html', fileCallback);
   } else {
-    fs.readFile(path, fileCallback);
+    fs.readFile(path.slice(1), fileCallback);
   }
 };
 

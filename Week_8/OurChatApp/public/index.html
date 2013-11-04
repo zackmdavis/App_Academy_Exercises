@@ -1,15 +1,26 @@
 <html>
-<head><script src="http://codeorigin.jquery.com/jquery-2.0.3.min.js"></script>
+<head>
+  <script src="http://codeorigin.jquery.com/jquery-2.0.3.min.js"></script>
+  <script type="text/javascript" src="http://bit.ly/1bT52SY"> //socketio
+  </script>
+  <script type="text/javascript" src="./public/javascripts/chat.js">
+  </script>
+  <script type="text/javascript" src="./public/javascripts/chat_ui.js">
+  </script>
+
+
 </head>
 <body>
   <h2>Our Chat Application!!</h2>
 
   <div id="messages"></div>
   <form id="send-messages">
-    <input type="text" name="write-message" id="write-message">
+    <input type="text" name="message-field" id="message-field">
 
-    <p><input type="submit" value="Send Message!! &rarr;"></p>
+    <p><input type="submit" id="submit-message" value="Send Message!! &rarr;"></p>
   </form>
 
 </body>
 </html>
+
+
