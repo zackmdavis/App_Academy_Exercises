@@ -15,6 +15,9 @@
   $(document).ready(function(){
     var ourSocket = io.connect("http://10.0.1.21:8080");
     ourSocket.on("message", displayMessage);
+    ourSocket.on("nicknameChangeResult", function(result) {
+      displayMessage(result.message);
+    })
     var ourChatSocket = new Chat.chatSocket(ourSocket);
 
     $('#send-messages').on("submit", function(event) {
