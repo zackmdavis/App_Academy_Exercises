@@ -34,6 +34,11 @@
     })
     var ourChatSocket = new Chat.chatSocket(ourSocket);
 
+    ourSocket.on('roomChange', function(roomName){
+      ourSocket.room = roomName;
+    });
+
+
     $('#send-messages').on("submit", function(event) {
       event.preventDefault();
       getMessage(ourChatSocket);

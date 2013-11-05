@@ -19,7 +19,9 @@
 
     if (command === 'nick'){
       this.socket.emit('nicknameChangeRequest', param);
-    } else {
+    } else if (command === 'join'){
+      this.socket.emit('roomChangeRequest', param)
+    }else {
       this.sendMessage('Someone submitted an incorrect command!')
     }
   }
