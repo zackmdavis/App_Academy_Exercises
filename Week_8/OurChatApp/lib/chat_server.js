@@ -8,6 +8,14 @@ var createChat = function(server){
     return (name.slice(0,5) !== 'guest' && !namesUsed[name])
   };
 
+  var currentNicknames = function() {
+    var names = [];
+    for (name in nicknames) {
+      names.push(nicknames[name]);
+    }
+    return names;
+  }
+
   var changeNickname = function(name, socket){
     console.log("name" + name)
     if(isValidNickname(name)){
@@ -17,6 +25,7 @@ var createChat = function(server){
       io.sockets.emit('nicknameChangeResult', {
         success: true,
         message: oldName + " changed name to " + name})
+      updateUsers();
     } else {
       socket.emit('nicknameChangeResult', {
         success: false,
@@ -24,15 +33,24 @@ var createChat = function(server){
     }
   };
 
+  var updateUsers = function(){
+    io.sockets.emit( 'updatedUsers', currentNicknames() )
+  };
+
+
   var connectionCallBack = function(socket){
-    console.log("Num of Guests: " + guestnumber);
     guestnumber++;
     nicknames[socket.id] = "guest_" + guestnumber;
-    console.log(nicknames);
+
+    updateUsers();
+
     socket.on("message", function(data){
       console.log("recieving: " + data);
+      data = nicknames[socket.id] + ": " + data
       io.sockets.emit('message', data)
     });
+
+    io.sockets.emit('message', nicknames[socket.id] + " joined the room.")
 
     socket.on('nicknameChangeRequest', function(name){
       changeNickname(name, socket);
@@ -41,7 +59,8 @@ var createChat = function(server){
     socket.on('disconnect', function() {
       io.sockets.emit("message", nicknames[socket.id] + " has left the room!!");
       delete nicknames[socket.id];
-    })
+      updateUsers();
+    });
   };
 
   io.sockets.on('connection', connectionCallBack);
