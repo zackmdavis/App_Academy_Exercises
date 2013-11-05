@@ -46,10 +46,8 @@ var createChat = function(server){
     joinRoom(socket, "The Lobby");
 
     socket.on("message", function(data){
-      console.log("recieving: " + data);
       var room = currentRooms[socket.id][0];
-      console.log("vrooooom",room);
-      var data = "[" + room + "] " + nicknames[socket.id] + ": " + data
+      var data = "<span style='color: #33AB45;'>[" + room + "]</span> <span style='font-weight: bold; color: #A32352'>" + nicknames[socket.id] + "</span>: " + data
       io.sockets.in(room).emit('message', data)
     });
 
