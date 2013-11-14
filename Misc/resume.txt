@@ -1,0 +1,52 @@
+Zack M. Davis
+
+cell 925 212 6625
+email main at zackmdavis dot net
+
+Skills
+=======
+
+Python, Ruby, JavaScript, Rails, HTML/CSS
+
+
+Projects
+=======
+
+* Wires
+
+  A lightweight web framework in Python.
+
+  Source: https://github.com/zackmdavis/Wires
+
+* Superscription
+
+  An RSS reader in Ruby on Rails.
+
+  Online: http://superscription.herokuapp.com/
+  Source: https://github.com/zackmdavis/Superscription
+
+* Turtle Arithmetic
+
+  A novelty calculator in turtle graphics.
+
+  Source: https://github.com/zackmdavis/Turtle_Arithmetic
+
+* Expository blog posts on mathematics and programming---
+  http://zackmdavis.net/blog/category/mathematics/
+  http://zackmdavis.net/blog/category/computing/
+
+
+Work Experience
+=======
+
+various 2009–2012 * Machine Intelligence Research Institute
+  May–August 2012:
+     Reorganized donor database, wrote Python scripts to
+     automate part of the process and generate reports
+  December 2011–January 2012:
+     Designed slides and booklets for training seminar
+  July–August 2010:
+     Designed programs and made logistical preparations for
+     conference with hundreds of attendees
+
+2006—2009 * Safeway, Inc.
